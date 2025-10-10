@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-4 bg-light min-vh-100">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 text-primary">Nurse Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's your hospital overview</p>
+        </div>
+        <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+            <i class="fas fa-sync-alt me-2"></i>Real-time Data
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-bed text-primary fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Total Beds</small>
+                    <h3 class="mb-0 fw-bold text-dark">{{ total_beds }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Available</small>
+                    <h3 class="mb-0 fw-bold text-success">{{ available_beds }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-procedures text-danger fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Occupied</small>
+                    <h3 class="mb-0 fw-bold text-danger">{{ occupied_beds }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-tools text-warning fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Maintenance</small>
+                    <h3 class="mb-0 fw-bold text-warning">{{ maintenance_beds }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-purple bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-clock text-purple fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Pending Requests</small>
+                    <h3 class="mb-0 fw-bold text-purple">{{ pending_requests }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Analytics Section -->
+    <div class="row g-4">
+        <!-- Pie Chart -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-chart-pie text-primary me-2"></i>
+                        Bed Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 text-center">
+                            <canvas id="bedStatusChart" width="200" height="200"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-success me-2" style="width: 12px; height: 12px;"></span>
+                                <span class="text-muted">Available</span>
+                                <span class="ms-auto fw-bold">{{ available_beds }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-danger me-2" style="width: 12px; height: 12px;"></span>
+                                <span class="text-muted">Occupied</span>
+                                <span class="ms-auto fw-bold">{{ occupied_beds }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-warning me-2" style="width: 12px; height: 12px;"></span>
+                                <span class="text-muted">Maintenance</span>
+                                <span class="ms-auto fw-bold">{{ maintenance_beds }}</span>
+                            </div>
+                            <hr>
+                            <div class="text-center">
+                                <h4 class="text-primary mb-1">{{ total_beds }}</h4>
+                                <small class="text-muted">Total Beds</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Analytics -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-chart-line text-success me-2"></i>
+                        Occupancy Analytics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Occupancy Rate -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Occupancy Rate</span>
+                            <span class="fw-bold text-danger">{% widthratio occupied_beds total_beds 100 %}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 style="width: {% widthratio occupied_beds total_beds 100 %}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Availability Rate -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Availability Rate</span>
+                            <span class="fw-bold text-success">{% widthratio available_beds total_beds 100 %}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {% widthratio available_beds total_beds 100 %}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance Rate -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Maintenance Rate</span>
+                            <span class="fw-bold text-warning">{% widthratio maintenance_beds total_beds 100 %}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 style="width: {% widthratio maintenance_beds total_beds 100 %}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Card -->
+                    <div class="bg-light rounded p-3 mt-4">
+                        <h6 class="mb-2">Summary</h6>
+                        <p class="small text-muted mb-0">
+                            {{ available_beds }} beds available out of {{ total_beds }} total beds. 
+                            {% if available_beds > occupied_beds %}
+                            Good availability for new admissions.
+                            {% else %}
+                            Limited availability. Consider prioritizing urgent cases.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="fas fa-bolt text-warning me-2"></i>
+                Quick Actions
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'add_bed' %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-3">
+                        <i class="fas fa-user-plus me-2"></i>
+                        <span>Add Bed</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="#" class="btn btn-success w-100 d-flex align-items-center justify-content-center py-3">
+                        <i class="fas fa-bed me-2"></i>
+                        <span>Assign Bed</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'view_bed_request' %}" class="btn btn-warning w-100 d-flex align-items-center justify-content-center py-3">
+                        <i class="fas fa-list me-2"></i>
+                        <span>View Requests</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="#" class="btn btn-info w-100 d-flex align-items-center justify-content-center py-3">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        <span>Reports</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('bedStatusChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Available', 'Occupied', 'Maintenance'],
+            datasets: [{
+                data: [
+                    {{ bed_status_data.Available }},
+                    {{ bed_status_data.Occupied }},
+                    {{ bed_status_data.Maintenance }}
+                ],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.9)',
+                    'rgba(239, 68, 68, 0.9)',
+                    'rgba(234, 179, 8, 0.9)'
+                ],
+                borderColor: 'white',
+                borderWidth: 3,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+
+// Add hover effects
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.hover-shadow');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+
+.bg-purple {
+    background-color: #6f42c1 !important;
+}
+
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

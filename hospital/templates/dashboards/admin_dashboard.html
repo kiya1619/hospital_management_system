@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h4 fw-bold text-dark mb-1">Admin Dashboard</h2>
+            <p class="text-muted mb-0">Hospital Management Overview</p>
+        </div>
+        <div class="text-muted">
+            <i class="fas fa-hospital me-2"></i>
+            <span>Hospital Analytics</span>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Patients -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title text-muted text-uppercase small fw-bold">Total Patients</h6>
+                            <h2 class="fw-bold text-primary mb-0">{{ total_patients }}</h2>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                <i class="fas fa-users text-primary fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title text-muted text-uppercase small fw-bold">Total Appointments</h6>
+                            <h2 class="fw-bold text-info mb-0">{{ total_appointments }}</h2>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                                <i class="fas fa-calendar-check text-info fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lab Requests -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title text-muted text-uppercase small fw-bold">Lab Requests</h6>
+                            <h2 class="fw-bold text-warning mb-0">{{ total_lab_requests }}</h2>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                                <i class="fas fa-flask text-warning fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title text-muted text-uppercase small fw-bold">Prescriptions</h6>
+                            <h2 class="fw-bold text-success mb-0">{{ total_prescriptions }}</h2>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                <i class="fas fa-prescription text-success fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analytics -->
+    <div class="row g-4">
+        <!-- Appointments Breakdown -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold text-dark">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                        Appointments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <span class="fw-semibold">Scheduled</span>
+                        <span class="badge bg-info bg-opacity-10 text-info border-0 fs-6">{{ scheduled_appointments }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <span class="fw-semibold">Completed</span>
+                        <span class="badge bg-success bg-opacity-10 text-success border-0 fs-6">{{ completed_appointments }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                        <span class="fw-semibold">Canceled</span>
+                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 fs-6">{{ canceled_appointments }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lab Requests Breakdown -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold text-dark">
+                        <i class="fas fa-flask me-2 text-warning"></i>
+                        Lab Requests
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <span class="fw-semibold">Pending</span>
+                        <span class="badge bg-warning bg-opacity-10 text-warning border-0 fs-6">{{ pending_lab_requests }}</span>
+                    </div>
+                   
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                        <span class="fw-semibold">Completed</span>
+                        <span class="badge bg-success bg-opacity-10 text-success border-0 fs-6">{{ completed_lab_requests }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions & Beds -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold text-dark">
+                        <i class="fas fa-bed me-2 text-success"></i>
+                        Beds & Prescriptions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <span class="fw-semibold">Total Beds</span>
+                        <span class="badge bg-dark bg-opacity-10 text-dark border-0 fs-6">{{ total_beds }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <span class="fw-semibold">Available Beds</span>
+                        <span class="badge bg-success bg-opacity-10 text-success border-0 fs-6">{{ available_beds }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <span class="fw-semibold">Fulfilled Prescriptions</span>
+                        <span class="badge bg-success bg-opacity-10 text-success border-0 fs-6">{{ fulfilled_prescriptions }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                        <span class="fw-semibold">Unfulfilled Prescriptions</span>
+                        <span class="badge bg-warning bg-opacity-10 text-warning border-0 fs-6">{{ unfulfilled_prescriptions }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row g-4 mt-2">
+        <!-- Appointments Chart -->
+        <div class="col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold text-dark">
+                        <i class="fas fa-chart-bar me-2 text-primary"></i>
+                        Appointments Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container position-relative" style="height: 250px;">
+                        <canvas id="appointmentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lab Requests Chart -->
+        <div class="col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold text-dark">
+                        <i class="fas fa-chart-pie me-2 text-warning"></i>
+                        Lab Requests Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container position-relative" style="height: 250px;">
+                        <canvas id="labRequestsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Appointments Chart
+    const appointmentsCtx = document.getElementById('appointmentsChart').getContext('2d');
+    const appointmentsChart = new Chart(appointmentsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Scheduled', 'Completed', 'Canceled'],
+            datasets: [{
+                label: 'Appointments',
+                data: [{{ scheduled_appointments }}, {{ completed_appointments }}, {{ canceled_appointments }}],
+                backgroundColor: [
+                    'rgba(13, 202, 240, 0.8)',
+                    'rgba(25, 135, 84, 0.8)',
+                    'rgba(220, 53, 69, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(13, 202, 240)',
+                    'rgb(25, 135, 84)',
+                    'rgb(220, 53, 69)'
+                ],
+                borderWidth: 1,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Lab Requests Chart
+    const labRequestsCtx = document.getElementById('labRequestsChart').getContext('2d');
+    const labRequestsChart = new Chart(labRequestsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'In Progress', 'Completed'],
+            datasets: [{
+                data: [{{ pending_lab_requests }}, {{ in_progress_lab_requests }}, {{ completed_lab_requests }}],
+                backgroundColor: [
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(13, 202, 240, 0.8)',
+                    'rgba(25, 135, 84, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(255, 193, 7)',
+                    'rgb(13, 202, 240)',
+                    'rgb(25, 135, 84)'
+                ],
+                borderWidth: 2,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+}
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+</style>
+{% endblock %}

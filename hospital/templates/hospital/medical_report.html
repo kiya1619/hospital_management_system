@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+{% block title %}Medical Report{% endblock %}
+
+{% block content %}
+<style>
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    border: 1px solid #e3e6f0;
+}
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+    font-weight: 600;
+    background: linear-gradient(135deg, #f8f9fc 0%, #e3e6f0 100%);
+    border-bottom: 1px solid #e3e6f0;
+    padding: 1rem 1.5rem;
+}
+.table th {
+    border-top: none;
+    font-weight: 700;
+    background-color: #f8f9fa;
+}
+.badge {
+    font-size: 0.75em;
+    font-weight: 500;
+}
+.prescription-card {
+    background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+    border-left: 4px solid #2E86AB !important;
+    border-radius: 8px;
+}
+.results-section {
+    background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #e3e6f0;
+}
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 12px 30px;
+    transition: all 0.3s ease;
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.medical-header {
+    background: linear-gradient(135deg, #2E86AB 0%, #1B4B6F 100%);
+    border-radius: 12px;
+    color: white;
+    padding: 2rem;
+}
+.watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 4rem;
+    color: rgba(46, 134, 171, 0.08);
+    font-weight: 900;
+    z-index: 9999;
+    pointer-events: none;
+    white-space: nowrap;
+    font-family: 'Arial', sans-serif;
+}
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+.empty-state {
+    padding: 3rem 2rem;
+    color: #6c757d;
+}
+.empty-state i {
+    opacity: 0.5;
+}
+.section-icon {
+    color: #2E86AB;
+    width: 20px;
+}
+.medical-alert {
+    border-left: 4px solid #2E86AB;
+    background: linear-gradient(135deg, #f8f9fc 0%, #e8f4f8 100%);
+}
+
+/* ✅ Print Styles */
+@media print {
+    .watermark {
+        display: block !important;
+        opacity: 0.15;
+        font-size: 6rem;
+    }
+    
+    .btn,
+    nav,
+    header,
+    footer,
+    .alert,
+    .card-header.bg-light.d-flex,
+    a[href],
+    .badge.bg-light.text-primary {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+
+    .container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        margin-bottom: 1rem !important;
+        page-break-inside: avoid;
+    }
+
+    .card-body {
+        padding: 1rem !important;
+    }
+
+    .medical-header {
+        background: #2E86AB !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+
+    h2, h5, h6 {
+        color: black !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .table {
+        font-size: 10pt;
+    }
+
+    .table th {
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+
+    .prescription-card {
+        border-left: 3px solid #2E86AB !important;
+        background: white !important;
+    }
+
+    .badge {
+        border: 1px solid #ddd;
+        background: white !important;
+        color: black !important;
+    }
+
+    /* Ensure proper page breaks */
+    .card {
+        page-break-inside: avoid;
+    }
+    
+    /* Remove gradients for print */
+    .card-header {
+        background: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+}
+
+/* ✅ Screen-only styles */
+@media screen {
+    .watermark {
+        display: none;
+    }
+}
+</style>
+
+<!-- Watermark Element -->
+<div class="watermark">KiyaCare Medical Center</div>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="card border-0 mb-4">
+        <div class="medical-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2 display-6 fw-bold"><i class="fas fa-file-medical me-3"></i>Medical Report</h1>
+                    <p class="mb-0 fs-5 opacity-90">Comprehensive Health Summary & Treatment Record</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="bg-white text-primary px-3 py-2 rounded-pill d-inline-block">
+                        <i class="fas fa-calendar me-2"></i>
+                        <strong>{{ appointment.date_time|date:"F d, Y" }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Information -->
+    <div class="card medical-alert">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="fas fa-user-injured section-icon me-2"></i>Patient Information</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-user-circle text-primary me-3 fs-5"></i>
+                        <div>
+                            <strong class="text-primary d-block">Patient Name</strong>
+                            <span class="fs-5">{{ appointment.patient.user.get_full_name }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar-alt text-primary me-3 fs-5"></i>
+                        <div>
+                            <strong class="text-primary d-block">Appointment Date</strong>
+                            <span class="fs-5">{{ appointment.date_time|date:"M d, Y H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-user-md text-primary me-3 fs-5"></i>
+                        <div>
+                            <strong class="text-primary d-block">Attending Doctor</strong>
+                            <span class="fs-5">Dr. {{ appointment.doctor.get_full_name | title }}</span>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prescriptions Section -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-prescription section-icon me-2"></i>Prescriptions</h4>
+            <span class="status-badge bg-primary text-white">{{ appointment.prescriptions.count }} Prescription(s)</span>
+        </div>
+        <div class="card-body">
+            {% if appointment.prescriptions.exists %}
+                {% for prescription in appointment.prescriptions.all %}
+                <div class="prescription-card mb-4 p-4 border rounded">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-md text-success me-2"></i>
+                                <strong class="me-2">Prescribed By:</strong>
+                                <span>Dr. {{ prescription.doctor.get_full_name }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <div class="d-flex align-items-center justify-content-end">
+                                <i class="fas fa-clock text-info me-2"></i>
+                                <strong class="me-2">Date:</strong>
+                                <span>{{ prescription.date_created|date:"M d, Y H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th><i class="fas fa-pills me-2"></i>Medicine</th>
+                                    <th><i class="fas fa-syringe me-2"></i>Dosage</th>
+                                    <th><i class="fas fa-info-circle me-2"></i>Instructions</th>
+                                    <th><i class="fas fa-hashtag me-2"></i>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pm in prescription.prescriptionmedicine_set.all %}
+                                <tr>
+                                    <td><strong class="text-dark">{{ pm.medicine.name }}</strong></td>
+                                    <td><span class="text-success">{{ pm.medicine.dosage }}</span></td>
+                                    <td>{{ pm.medicine.instructions }}</td>
+                                    <td><span class="badge bg-primary rounded-pill fs-6">{{ pm.quantity }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% if prescription.notes %}
+                    <div class="mt-3 p-3 bg-light rounded medical-alert">
+                        <strong><i class="fas fa-clipboard-check me-2"></i>Additional Notes:</strong>
+                        <p class="mb-0 mt-2">{{ prescription.notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state text-center">
+                    <i class="fas fa-prescription-bottle fa-4x mb-3"></i>
+                    <h5 class="text-muted">No Prescriptions Available</h5>
+                    <p class="text-muted">No prescriptions have been issued for this appointment.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Lab Tests Section -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="fas fa-flask section-icon me-2"></i>Laboratory Tests</h4>
+        </div>
+        <div class="card-body">
+            {% with lab_request=appointment.lab_requests.first %}
+                {% if lab_request %}
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-tasks me-2 text-primary"></i>
+                                <strong class="me-2">Status:</strong>
+                                <span class="status-badge {% if lab_request.status == 'completed' %}bg-success{% elif lab_request.status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %} text-white">
+                                    {{ lab_request.status|capfirst }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if lab_request.status == 'completed' and lab_request.results %}
+                        <div class="results-section">
+                            <h5 class="text-primary mb-3"><i class="fas fa-chart-line me-2"></i>Test Results</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-info">
+                                        <tr>
+                                            <th><i class="fas fa-vial me-2"></i>Test Name</th>
+                                            <th><i class="fas fa-clipboard-check me-2"></i>Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for test_name, result_value in lab_request.results.items %}
+                                        <tr>
+                                            <td><strong>{{ test_name }}</strong></td>
+                                            <td><span class="text-success">{{ result_value }}</span></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info d-flex align-items-center">
+                            <i class="fas fa-info-circle me-3 fs-4"></i>
+                            <div>
+                                <strong>Laboratory Results Pending</strong>
+                                <p class="mb-0">Test results are not yet available. Please check back later.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if lab_request.instructions %}
+                    <div class="mt-4 p-3 bg-light rounded medical-alert">
+                        <strong><i class="fas fa-clipboard-list me-2"></i>Test Instructions:</strong>
+                        <p class="mb-0 mt-2">{{ lab_request.instructions }}</p>
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    <div class="empty-state text-center">
+                        <i class="fas fa-flask fa-4x mb-3"></i>
+                        <h5 class="text-muted">No Laboratory Tests</h5>
+                        <p class="text-muted">No laboratory tests were requested for this appointment.</p>
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Bed Assignment Section -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="fas fa-bed section-icon me-2"></i>Bed Assignment</h4>
+        </div>
+        <div class="card-body">
+            {% with bed_request=appointment.bed_requests.first %}
+                {% if bed_request and bed_request.assignment.first %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-bed text-primary me-3 fs-4"></i>
+                                <div>
+                                    <strong class="text-primary d-block">Bed Number</strong>
+                                    <span class="fs-4 fw-bold text-dark">{{ bed_request.assignment.first.bed.bed_number }}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-building text-primary me-3 fs-5"></i>
+                                <div>
+                                    <strong class="text-primary d-block">Ward/Department</strong>
+                                    <span class="fs-5">{{ bed_request.assignment.first.bed.ward }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-user-md text-primary me-3 fs-5"></i>
+                                <div>
+                                    <strong class="text-primary d-block">Assigned By</strong>
+                                    <span class="fs-5">{{ bed_request.assignment.first.assigned_by.get_full_name | title }}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-calendar-check text-primary me-3 fs-5"></i>
+                                <div>
+                                    <strong class="text-primary d-block">Date Assigned</strong>
+                                    <span class="fs-5">{{ bed_request.assignment.first.date_assigned|date:"M d, Y H:i" }}</span>
+                                </div>
+                            </div>
+                            {% if bed_request.assignment.first.date_released %}
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-sign-out-alt text-success me-3 fs-5"></i>
+                                <div>
+                                    <strong class="text-success d-block">Date Released</strong>
+                                    <span class="fs-5">{{ bed_request.assignment.first.date_released|date:"M d, Y H:i" }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state text-center">
+                        <i class="fas fa-bed fa-4x mb-3"></i>
+                        <h5 class="text-muted">No Bed Assigned</h5>
+                        <p class="text-muted">No bed assignment has been made for this appointment.</p>
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Doctor Notes Section -->
+    {% if bed_request.notes %}
+    <div class="card border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0"><i class="fas fa-stethoscope me-2"></i>Doctor's Clinical Notes</h4>
+        </div>
+        <div class="card-body">
+            <div class="p-4 bg-light rounded medical-alert">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-quote-left text-warning me-3 mt-1 fs-4"></i>
+                    <p class="mb-0 fs-5">{{ bed_request.notes }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="card border-0 bg-transparent">
+        <div class="card-body text-center py-4">
+            <button class="btn btn-success btn-lg me-3 px-5" onclick="window.print()">
+                <i class="fas fa-print me-2"></i>Print Medical Report
+            </button>
+            <a href="{% url 'my_appointments' %}" class="btn btn-outline-primary btn-lg px-5">
+                <i class="fas fa-arrow-left me-2"></i>Back to Appointments
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

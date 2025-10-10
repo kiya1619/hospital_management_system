@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Bed{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        🛏️ Assign Bed — {{ bed_request.appointment.patient.user.get_full_name }}
+                    </h5>
+                  
+                </div>
+
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Doctor’s Note:</strong><br>
+                        {{ bed_request.notes|default:"No additional notes from the doctor." }}
+                    </div>
+
+                    <form method="POST" class="mt-3">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Select Available Bed</label>
+                            <select class="form-select shadow-sm" name="bed_id" required>
+                                <option value="" selected disabled>-- Choose a bed --</option>
+                                {% for bed in available_beds %}
+                                    <option value="{{ bed.id }}">
+                                        🛏️ Bed {{ bed.bed_number }} — {{ bed.ward|capfirst }} ({{ bed.status|capfirst }})
+                                    </option>
+                                {% empty %}
+                                    <option disabled>No available beds at the moment</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success fw-semibold shadow-sm">
+                                <i class="fas fa-check-circle me-2"></i>Assign Bed
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-light text-center">
+                    <a href="{% url 'view_bed_request' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back to Bed Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Small visual enhancement -->
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+    select.form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25,135,84,.25);
+    }
+</style>
+{% endblock %}

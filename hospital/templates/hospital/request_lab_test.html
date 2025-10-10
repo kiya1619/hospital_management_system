@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Request Lab Test{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-gradient-primary text-white py-3">
+                <h4 class="mb-0">
+                    <i class="fas fa-vials me-2"></i>
+                    Request Lab Test for {{ appointment.patient.user.get_full_name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- Patient Info -->
+                    <div class="mb-4">
+                        <h5>Patient Information</h5>
+                        <p class="mb-1"><strong>Name:</strong> {{ appointment.patient.user.get_full_name }}</p>
+                        <p class="mb-1"><strong>Appointment Date:</strong> {{ appointment.date_time|date:"F j, Y H:i" }}</p>
+                    </div>
+
+                    <!-- Available Lab Tests -->
+                    <div class="mb-4">
+                        <h5>Select Lab Tests</h5>
+                        <div class="border p-3" style="max-height: 300px; overflow-y: auto;">
+                            {% for test in lab_tests %}
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="tests" value="{{ test.id }}" id="test{{ test.id }}">
+                                <label class="form-check-label" for="test{{ test.id }}">
+                                    {{ test.name }} 
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Notes/Instructions -->
+                    <div class="mb-4">
+                        <h5>Additional Instructions</h5>
+                        <textarea class="form-control" name="instructions" rows="3" placeholder="Enter any notes or instructions for lab technician..."></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Lab Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    .card {
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}

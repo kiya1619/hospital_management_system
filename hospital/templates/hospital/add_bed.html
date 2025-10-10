@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Add Bed{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5>Add New Bed</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Ward</label>
+                        <select class="form-select" name="ward" id="wardSelect" required>
+                            <option value="" disabled selected>Select Ward</option>
+                            {% for ward in wards %}
+                                <option value="{{ ward }}">{{ ward }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bed Number</label>
+                        <input type="text" class="form-control" name="bed_number" id="bedNumberInput" placeholder="Enter bed number" required>
+                        <small class="text-muted">Suggested: <span id="suggestedBed"></span></small>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">Add Bed</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const wardSelect = document.getElementById('wardSelect');
+    const suggestedBed = document.getElementById('suggestedBed');
+    const bedNumberInput = document.getElementById('bedNumberInput');
+
+    const suggestedNumbers = {{ suggested_numbers|safe }};
+
+    wardSelect.addEventListener('change', function() {
+        const ward = this.value;
+        if (ward in suggestedNumbers) {
+            suggestedBed.textContent = suggestedNumbers[ward];
+            bedNumberInput.value = suggestedNumbers[ward];
+        } else {
+            suggestedBed.textContent = '';
+            bedNumberInput.value = '';
+        }
+    });
+</script>
+{% endblock %}

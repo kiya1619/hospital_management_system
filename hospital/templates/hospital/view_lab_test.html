@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Lab Test Results{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4>Lab Results for {{ lab_request.appointment.patient.user.get_full_name }}</h4>
+                <small>Requested by: {{ lab_request.doctor.get_full_name }}</small>
+            </div>
+            <div class="card-body">
+                <!-- Lab Request Info -->
+                <p><strong>Appointment Date:</strong> {{ lab_request.appointment.date_time|date:"F j, Y H:i" }}</p>
+                <p><strong>Status:</strong> 
+                    {% if lab_request.status == 'completed' %}
+                        <span class="badge bg-success">Completed</span>
+                    {% else %}
+                        <span class="badge bg-warning">Pending</span>
+                    {% endif %}
+                </p>
+                
+                <!-- Instructions -->
+                {% if lab_request.instructions %}
+                    <div class="mb-3">
+                        <h6>Additional Instructions:</h6>
+                        <p>{{ lab_request.instructions }}</p>
+                    </div>
+                {% endif %}
+                
+                <!-- Test Results -->
+                <div class="mb-3">
+                    <h5>Test Results</h5>
+                    {% if lab_request.results %}
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Test</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test, result in lab_request.results.items %}
+                                <tr>
+                                    <td>{{ test }}</td>
+                                    <td>{{ result }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted">Lab technician has not filled the results yet.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Attached Images -->
+                <div class="mb-3">
+                    <h5>Attached Images (Scans / Reports)</h5>
+                    {% if lab_request.images.exists %}
+                        <div class="row">
+                            {% for img in lab_request.images.all %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card shadow-sm border-0">
+                                        <img src="{{ img.image.url }}" class="card-img-top rounded-top"
+                                             alt="Lab result image" style="height: 200px; object-fit: cover;">
+                                        <div class="card-body p-2 text-center">
+                                            <small class="text-muted">{{ img.description|default:"No description" }}</small>
+                                        </div>
+                                        <div class="text-center pb-2">
+                                            <a href="{{ img.image.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                View Full
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No images uploaded for this lab request.</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

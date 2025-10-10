@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}My Appointments{% endblock %}
+{% load static %}
+{% block content %}
+<h3>My Appointments</h3>
+
+<table class="table table-striped table-bordered mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Patient</th>
+            <th>Date & Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in appointments %}
+        <tr>
+            <td>{{ a.patient.user.get_full_name|title }}</td>
+            <td>{{ a.date_time|date:"Y-m-d H:i" }}</td>
+            <td>{{ a.status|capfirst }}</td>
+            <td>
+                {% if a.status == 'completed' %}
+                    <!-- Only Medical Report for completed appointments -->
+                    <a href="{% url 'medical_report' a.id %}" class="btn btn-sm btn-info">View Medical Report</a>
+                {% else %}
+                    <!-- Prescription Modal Button -->
+                    {% if a.prescriptions.exists %}
+                        <button class="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#prescriptionModal{{ a.id }}">
+                            View Prescription
+                        </button>
+
+                        <!-- Prescription Modal -->
+                        <div class="modal fade" id="prescriptionModal{{ a.id }}" tabindex="-1" aria-labelledby="prescriptionModalLabel{{ a.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="prescriptionModalLabel{{ a.id }}">
+                                            Prescription for {{ a.patient.user.get_full_name }}
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body" id="prescriptionContent{{ a.id }}">
+                                        {% for prescription in a.prescriptions.all %}
+                                            <p><strong>Prescribed By:</strong> {{ prescription.doctor.get_full_name }}</p>
+                                            <p><strong>Date:</strong> {{ prescription.date_created|date:"M d, Y H:i" }}</p>
+                                            <hr>
+                                            <table class="table table-sm table-bordered">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Medicine</th>
+                                                        <th>Dosage</th>
+                                                        <th>Instructions</th>
+                                                        <th>Quantity</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for pm in prescription.prescriptionmedicine_set.all %}
+                                                        <tr>
+                                                            <td>{{ pm.medicine.name }}</td>
+                                                            <td>{{ pm.medicine.dosage }}</td>
+                                                            <td>{{ pm.medicine.instructions }}</td>
+                                                            <td>{{ pm.quantity }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            {% if prescription.notes %}
+                                                <p><strong>Notes:</strong> {{ prescription.notes }}</p>
+                                            {% endif %}
+                                            <hr>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-success" onclick="printPrescription('{{ a.id }}')">Print</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'create_prescription' a.id %}" class="btn btn-sm btn-success">Write Prescription</a>
+                    {% endif %}
+
+                    <!-- Lab Test Button -->
+                    {% with lab_request=a.lab_requests.first %}
+                        {% if lab_request %}
+                            {% if lab_request.status == 'completed' %}
+                                <a href="{% url 'view_lab_test' lab_request.id %}" class="btn btn-sm btn-info">View Lab Test</a>
+                            {% else %}
+                                <span class="btn btn-sm btn-warning">Pending Lab Test</span>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'request_lab_test' a.id %}" class="btn btn-sm btn-secondary">Request Lab Test</a>
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Bed Request / Assigned Bed -->
+                    {% with bed_request=a.bed_requests.first %}
+                        {% if bed_request %}
+                            {% if bed_request.status == 'pending' %}
+                                <span class="btn btn-sm btn-warning">Bed Requested (Pending)</span>
+                            {% elif bed_request.status == 'fulfilled' and bed_request.assignment.first %}
+                                <button class="btn btn-sm btn-info"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#bedModal{{ a.id }}">
+                                    View Assigned Bed
+                                </button>
+
+                                <!-- Bed Modal -->
+                                <div class="modal fade" id="bedModal{{ a.id }}" tabindex="-1" aria-labelledby="bedModalLabel{{ a.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title" id="bedModalLabel{{ a.id }}">
+                                                    Assigned Bed for {{ a.patient.user.get_full_name }}
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>Bed Number:</strong> {{ bed_request.assignment.first.bed.bed_number }}</p>
+                                                <p><strong>Ward:</strong> {{ bed_request.assignment.first.bed.ward }}</p>
+                                                <p><strong>Status:</strong> {{ bed_request.assignment.first.bed.status|capfirst }}</p>
+                                                <p><strong>Assigned By (Nurse):</strong> {{ bed_request.assignment.first.assigned_by.get_full_name }}</p>
+                                                <p><strong>Date Assigned:</strong> {{ bed_request.assignment.first.date_assigned|date:"M d, Y H:i" }}</p>
+                                                {% if bed_request.assignment.first.date_released %}
+                                                    <p><strong>Date Released:</strong> {{ bed_request.assignment.first.date_released|date:"M d, Y H:i" }}</p>
+                                                {% endif %}
+                                                {% if bed_request.notes %}
+                                                    <p><strong>Doctor Notes:</strong> {{ bed_request.notes }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'request_bed' a.id %}" class="btn btn-sm btn-outline-warning">Request Bed</a>
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Complete Appointment -->
+                    {% if a.status == 'scheduled' %}
+                        <form action="{% url 'complete_appointment' a.id %}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to complete this appointment?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success">Complete</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">No appointments scheduled.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Print Prescription Function -->
+<script>
+function printPrescription(id) {
+    var content = document.getElementById('prescriptionContent' + id).innerHTML;
+    var mywindow = window.open('', 'Print', 'height=600,width=800');
+    mywindow.document.write('<html><head><title>Prescription</title>');
+    mywindow.document.write('<link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">');
+    mywindow.document.write('</head><body>');
+    mywindow.document.write(content);
+    mywindow.document.write('</body></html>');
+    mywindow.document.close();
+    mywindow.focus();
+    mywindow.print();
+    mywindow.close();
+}
+</script>
+
+{% endblock %}

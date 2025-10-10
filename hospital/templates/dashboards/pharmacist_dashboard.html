@@ -1,0 +1,444 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-4 bg-light min-vh-100">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 text-primary">
+                <i class="fas fa-prescription-bottle-medical me-2"></i>
+                Pharmacy Dashboard
+            </h1>
+            <p class="text-muted mb-0">Comprehensive medication inventory and expiry management</p>
+        </div>
+        <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+            <i class="fas fa-calendar-day me-2"></i>{{ today }}
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Total Medicines -->
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-pills text-primary fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Total Medicines</small>
+                    <h3 class="mb-0 fw-bold text-dark">{{ total_medicines }}</h3>
+                    <small class="text-muted">All inventory items</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- In Stock -->
+         <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-boxes text-success fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">In Stock</small>
+                    <h3 class="mb-0 fw-bold text-success">{{ in_stock }}</h3>
+<small class="text-muted">Available medicines</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Low Stock -->
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-exclamation-triangle text-warning fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Low Stock</small>
+                    <h3 class="mb-0 fw-bold text-warning">{{ low_stock }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Out of Stock -->
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-times-circle text-danger fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Out of Stock</small>
+                    <h3 class="mb-0 fw-bold text-danger">{{ out_of_stock }}</h3>
+                    <small class="text-danger">Requires immediate attention</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Expired Medicines -->
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 hover-shadow">
+                <div class="card-body text-center p-3">
+                    <div class="bg-dark bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                        <i class="fas fa-skull-crossbones text-dark fs-5"></i>
+                    </div>
+                    <small class="text-muted d-block">Expired</small>
+                    <h3 class="mb-0 fw-bold text-dark">{{ expired_medicines }}</h3>
+                    <small class="text-dark">Remove from inventory</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Analytics Section -->
+    <div class="row g-4">
+        <!-- Stock Distribution Chart -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>
+                        Medicine Stock Distribution
+                    </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">All Medicines</a></li>
+                            <li><a class="dropdown-item" href="#">Low Stock Only</a></li>
+                            <li><a class="dropdown-item" href="#">Out of Stock</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Health Summary -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-heartbeat text-danger me-2"></i>
+                        Inventory Health
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Stock Health -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Stock Status</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-success me-2" style="width: 12px; height: 12px;"></span>
+                            <span class="text-muted">Adequate Stock</span>
+                            <span class="ms-auto fw-bold">{{ total_medicines|add:"-low_stock"|add:"-out_of_stock" }}</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-warning me-2" style="width: 12px; height: 12px;"></span>
+                            <span class="text-muted">Low Stock (≤10)</span>
+                            <span class="ms-auto fw-bold">{{ low_stock }}</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-danger me-2" style="width: 12px; height: 12px;"></span>
+                            <span class="text-muted">Out of Stock</span>
+                            <span class="ms-auto fw-bold">{{ out_of_stock }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Expiry Status -->
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-3">Expiry Status</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-dark me-2" style="width: 12px; height: 12px;"></span>
+                            <span class="text-muted">Expired Medicines</span>
+                            <span class="ms-auto fw-bold text-dark">{{ expired_medicines }}</span>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="text-center">
+                        <div class="mb-2">
+                            <h4 class="text-primary mb-1">{{ total_medicines }}</h4>
+                            <small class="text-muted">Total Medicines</small>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: {% widthratio total_medicines|add:"-low_stock"|add:"-out_of_stock" total_medicines 100 %}%"></div>
+                            <div class="progress-bar bg-warning" style="width: {% widthratio low_stock total_medicines 100 %}%"></div>
+                            <div class="progress-bar bg-danger" style="width: {% widthratio out_of_stock total_medicines 100 %}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Section -->
+    <div class="row mt-4">
+        <!-- Low Stock Alerts -->
+        {% if low_stock > 0 %}
+        <div class="col-lg-6 mb-4">
+            <div class="card border-warning shadow-sm h-100">
+                <div class="card-header bg-warning bg-opacity-10 border-warning d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Low Stock Alerts
+                    </h5>
+                    <span class="badge bg-warning">{{ low_stock }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Stock</th>
+                                    <th>Category</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for medicine in medicines %}
+                                    {% if medicine.stock_quantity <= 10 and medicine.stock_quantity > 0 %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ medicine.name }}</td>
+                                        <td>
+                                            <span class="badge {% if medicine.stock_quantity <= 5 %}bg-danger{% else %}bg-warning{% endif %}">
+                                                {{ medicine.stock_quantity }}
+                                            </span>
+                                        </td>
+                                        <td><small class="text-muted">{{ medicine.category|default:"General" }}</small></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-cart-plus me-1"></i>Reorder
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Expired Medicines -->
+        {% if expired_medicines > 0 %}
+        <div class="col-lg-6 mb-4">
+            <div class="card border-danger shadow-sm h-100">
+                <div class="card-header bg-danger bg-opacity-10 border-danger d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-skull-crossbones text-danger me-2"></i>
+                        Expired Medicines
+                    </h5>
+                    <span class="badge bg-danger">{{ expired_medicines }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Expiry Date</th>
+                                    <th>Batch No.</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for medicine in medicines %}
+                                    {% if medicine.expiry_date < today %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ medicine.name }}</td>
+                                        <td>
+                                            <span class="badge bg-danger">{{ medicine.expiry_date }}</span>
+                                        </td>
+                                        <td><small class="text-muted">{{ medicine.batch_number|default:"N/A" }}</small></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash me-1"></i>Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="fas fa-bolt text-warning me-2"></i>
+                Quick Actions
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'add_medicine' %}" class="btn btn-primary w-100 d-flex flex-column align-items-center py-3">
+                        <i class="fas fa-plus-circle mb-2 fs-4"></i>
+                        <span>Add Medicine</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="#" class="btn btn-success w-100 d-flex flex-column align-items-center py-3">
+                        <i class="fas fa-shopping-cart mb-2 fs-4"></i>
+                        <span>Place Order</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="#" class="btn btn-warning w-100 d-flex flex-column align-items-center py-3">
+                        <i class="fas fa-file-invoice mb-2 fs-4"></i>
+                        <span>Inventory Report</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'expired_medicine_report' %}" class="btn btn-info w-100 d-flex flex-column align-items-center py-3">
+                        <i class="fas fa-calendar-times mb-2 fs-4"></i>
+                        <span>Expiry Report</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('stockChart').getContext('2d');
+    
+    // Prepare chart data
+    const labels = {{ chart_data.labels|safe }};
+    const quantities = {{ chart_data.quantities|safe }};
+    
+    // Generate colors based on stock levels
+    const backgroundColors = quantities.map(qty => {
+        if (qty === 0) return 'rgba(220, 53, 69, 0.8)'; // Red for out of stock
+        if (qty <= 10) return 'rgba(255, 193, 7, 0.8)'; // Yellow for low stock
+        return 'rgba(40, 167, 69, 0.8)'; // Green for adequate stock
+    });
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Stock Quantity',
+                data: quantities,
+                backgroundColor: backgroundColors,
+                borderColor: 'white',
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Quantity in Stock'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            let status = 'Adequate Stock';
+                            if (value === 0) status = 'Out of Stock';
+                            else if (value <= 10) status = 'Low Stock';
+                            return `Quantity: ${value} - ${status}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+
+// Add hover effects
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.hover-shadow');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.chart-container {
+    position: relative;
+}
+
+.progress {
+    border-radius: 10px;
+}
+</style>
+{% endblock %}

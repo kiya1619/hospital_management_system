@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Medical Record - {{ patient.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<h3>Medical Record: {{ patient.user.get_full_name }}</h3>
+<p>DOB: {{ patient.dob }} | Gender: {{ patient.gender }}</p>
+
+{% for data in medical_data %}
+<div class="card mb-3 shadow-sm">
+    <div class="card-header bg-primary text-white">
+        Appointment on {{ data.appointment.date_time|date:"Y-m-d H:i" }} ({{ data.appointment.status|capfirst }})
+    </div>
+    <div class="card-body">
+
+        <!-- Prescriptions -->
+        <h5>Prescriptions:</h5>
+        {% if data.prescriptions %}
+            <ul>
+            {% for p in data.prescriptions %}
+                <li>
+                    {{ p.date_created|date:"Y-m-d" }} - Prescribed by {{ p.doctor.get_full_name }}
+                    {% if p.medicines.exists %}
+                        <ul>
+                        {% for pm in p.prescriptionmedicine_set.all %}
+                            <li>{{ pm.medicine.name }} - Quantity: {{ pm.quantity }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if p.notes %}<p>Notes: {{ p.notes }}</p>{% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No prescriptions.</p>
+        {% endif %}
+
+        <!-- Lab Requests -->
+   
+<h5>Lab Requests:</h5>
+{% if lab_requests %}
+    <ul>
+    {% for lab in lab_requests %}
+        <li class="mb-3">
+            <strong>Status:</strong> {{ lab.status|capfirst }}<br>
+            <strong>Tests:</strong>
+            {% for t in lab.tests %}
+                <span class="badge bg-info text-dark">{{ t }}</span>
+            {% endfor %}
+            {% if lab.results %}
+                <br><strong>Results:</strong>
+                <ul class="mt-2">
+                    {% for test_name, result_text in lab.results.items %}
+                        <li><b>{{ test_name|title }}</b>: {{ result_text }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted mt-1">No results recorded yet.</p>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No lab requests.</p>
+{% endif %}
+
+        <!-- Bed Assignments -->
+        <h5>Bed Assignments:</h5>
+        {% if data.bed_assignments %}
+            <ul>
+            {% for bed in data.bed_assignments %}
+                <li>Bed: {{ bed.assignment.first.bed.bed_number }} (Ward: {{ bed.assignment.first.bed.ward }}) | Fulfilled by: {{ bed.fulfilled_by.get_full_name }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No bed assignments.</p>
+        {% endif %}
+
+    </div>
+</div>
+{% empty %}
+<p>No medical records available.</p>
+{% endfor %}
+{% endblock %}

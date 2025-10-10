@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Add Medicine{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white text-center">
+                <h4>Add New Medicine</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- Medicine Name -->
+                    <div class="mb-3">
+                        <label class="form-label">Medicine Name</label>
+                        <input type="text" class="form-control" name="name" placeholder="Enter medicine name" required>
+                    </div>
+
+                    <!-- Dosage -->
+                    <div class="mb-3">
+                        <label class="form-label">Dosage</label>
+                        <input type="text" class="form-control" name="dosage" placeholder="e.g., 500mg, 2 tablets">
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="mb-3">
+                        <label class="form-label">Instructions</label>
+                        <textarea class="form-control" name="instructions" rows="3" placeholder="Enter usage instructions"></textarea>
+                    </div>
+
+                    <!-- Stock Quantity -->
+                    <div class="mb-3">
+                        <label class="form-label">Stock Quantity</label>
+                        <input type="number" class="form-control" name="stock_quantity" placeholder="Enter quantity in stock" required>
+                    </div>
+
+                    <!-- Expiry Date -->
+                    <div class="mb-3">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="date" class="form-control" name="expiry_date" required>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">Add Medicine</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center text-muted">
+                Hospital Management System
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

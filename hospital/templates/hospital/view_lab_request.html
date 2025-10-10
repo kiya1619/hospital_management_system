@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}View Lab Request{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-4">Lab Request Details</h3>
+
+    <div class="card shadow-sm p-4">
+        <!-- Request Information -->
+        <h5 class="mb-3 text-primary">Request Information</h5>
+        <p><strong>Request ID:</strong> {{ lab_request.id }}</p>
+        <p><strong>Appointment ID:</strong> {{ lab_request.appointment.id }}</p>
+        <p><strong>Patient:</strong> {{ lab_request.appointment.patient.user.get_full_name|title }}</p>
+        <p><strong>Doctor:</strong> {{ lab_request.doctor.get_full_name|title }}</p>
+        <p><strong>Lab Technician:</strong>
+            {% if lab_request.lab_technician %}
+                {{ lab_request.lab_technician.get_full_name|title }}
+            {% else %}
+                <span class="text-muted">Unassigned</span>
+            {% endif %}
+        </p>
+
+        <p><strong>Status:</strong>
+            {% if lab_request.status == 'pending' %}
+                <span class="badge bg-warning text-dark">Pending</span>
+            {% elif lab_request.status == 'in_progress' %}
+                <span class="badge bg-primary">In Progress</span>
+            {% elif lab_request.status == 'completed' %}
+                <span class="badge bg-success">Completed</span>
+            {% endif %}
+        </p>
+
+        <p><strong>Date Requested:</strong> {{ lab_request.date_created|date:"Y-m-d H:i" }}</p>
+        <p><strong>Instructions:</strong> {{ lab_request.instructions|default:"-" }}</p>
+
+        <hr>
+
+        <!-- Tests Ordered -->
+        <h5 class="mt-3 mb-3 text-primary">Tests Ordered</h5>
+        {% if lab_request.tests %}
+            <ul class="list-group mb-3">
+                {% for test in lab_request.tests %}
+                    <li class="list-group-item">{{ test }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">No tests listed.</p>
+        {% endif %}
+
+        <!-- Test Results -->
+        <h5 class="mt-3 mb-3 text-primary">Results</h5>
+        {% if lab_request.results %}
+            <ul class="list-group">
+                {% for key, value in lab_request.results.items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><strong>{{ key }}</strong></span>
+                        <span>{{ value }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">Results not filled yet.</p>
+        {% endif %}
+
+        <!-- Attached Images -->
+        <h5 class="mt-4 mb-3 text-primary">Attached Images (Scans / Reports)</h5>
+        {% if lab_request.images.all %}
+            <div class="row">
+                {% for img in lab_request.images.all %}
+                    <div class="col-md-3 mb-3">
+                        <div class="card shadow-sm border-0">
+                            <img src="{{ img.image.url }}" class="card-img-top rounded-top"
+                                 alt="Lab result image" style="height: 200px; object-fit: cover;">
+                            <div class="card-body p-2 text-center">
+                                <small class="text-muted">{{ img.description|default:"No description" }}</small>
+                            </div>
+                            <div class="text-center pb-2">
+                                <a href="{{ img.image.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                    View Full
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">No images uploaded for this lab request.</p>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="mt-4 text-end">
+            {% if lab_request.status == "completed" or lab_request.status == "in_progress" %}
+                <a href="{% url 'fill_lab_request' lab_request.id %}" class="btn btn-primary">
+                    Update Results
+                </a>
+            {% endif %}
+            <a href="{% url 'lab_requests' %}" class="btn btn-secondary">Back to Requests</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

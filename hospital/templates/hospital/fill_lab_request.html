@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Lab Request Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-4">Lab Request for {{ lab_request.appointment.patient.user.get_full_name }}</h3>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <p><strong>Appointment ID:</strong> {{ lab_request.appointment.id }}</p>
+            <p><strong>Doctor:</strong> {{ lab_request.doctor.get_full_name }}</p>
+            <p><strong>Status:</strong> {{ lab_request.status|capfirst }}</p>
+            <p><strong>Instructions:</strong> {{ lab_request.instructions|default:"-" }}</p>
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Tests and Results -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Tests & Results</h5>
+            </div>
+            <div class="card-body">
+                {% for test in lab_request.tests %}
+                <div class="mb-3">
+                    <label class="form-label">{{ test }}</label>
+                    <input type="text" class="form-control" name="result_{{ test }}"
+                           value="{{ lab_request.results.test|default_if_none:'' }}">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Attach Result Images (Optional)</h5>
+            </div>
+            <div class="card-body">
+                <input type="file" name="images" class="form-control" multiple>
+                <small class="text-muted">You can upload MRI, CT, or scan images here.</small>
+            </div>
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="fas fa-save me-2"></i>Save Results
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

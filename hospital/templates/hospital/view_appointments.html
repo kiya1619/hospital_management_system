@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}View Appointments{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-primary">
+            <i class="fas fa-calendar-check me-2"></i>Appointment Management
+        </h3>
+        <input type="text" id="searchInput" class="form-control w-25" placeholder="🔍 Search by patient, doctor or status...">
+    </div>
+
+    {% if appointments %}
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover align-middle">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Date & Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="appointmentsBody" class="text-center">
+                {% for appt in appointments %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ appt.patient.user.get_full_name|title }}</td>
+                    <td>{{ appt.doctor.get_full_name|title }}</td>
+                    <td>{{ appt.date_time|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        {% if appt.status == 'scheduled' %}
+                            <span class="badge bg-warning text-dark">Scheduled</span>
+                        {% elif appt.status == 'completed' %}
+                            <span class="badge bg-success">Completed</span>
+                        {% elif appt.status == 'canceled' %}
+                            <span class="badge bg-danger">Canceled</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3" id="paginationSection">
+        <div id="entriesInfo" class="text-muted small"></div>
+        <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+    </div>
+
+    {% else %}
+        <div class="alert alert-info mt-3">No appointments found in the system.</div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const rowsPerPage = 10;
+    const tableBody = document.getElementById("appointmentsBody");
+    const searchInput = document.getElementById("searchInput");
+    const pagination = document.getElementById("pagination");
+    const entriesInfo = document.getElementById("entriesInfo");
+
+    let allRows = Array.from(tableBody.querySelectorAll("tr"));
+    let filteredRows = [...allRows];
+    let currentPage = 1;
+
+    // Render only the rows for the current page
+    function renderTable() {
+        tableBody.innerHTML = "";
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageRows = filteredRows.slice(start, end);
+
+        pageRows.forEach(row => tableBody.appendChild(row));
+        updatePagination();
+        updateEntriesInfo();
+    }
+
+    // Update pagination buttons
+    function updatePagination() {
+        pagination.innerHTML = "";
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (totalPages <= 1) {
+            pagination.style.display = "none";
+            return;
+        } else {
+            pagination.style.display = "flex";
+        }
+
+        // Previous Button
+        const prev = document.createElement("li");
+        prev.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+        prev.innerHTML = `<a class="page-link" href="#">«</a>`;
+        prev.addEventListener("click", e => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+        pagination.appendChild(prev);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = `page-item ${i === currentPage ? "active" : ""}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener("click", e => {
+                e.preventDefault();
+                currentPage = i;
+                renderTable();
+            });
+            pagination.appendChild(li);
+        }
+
+        // Next Button
+        const next = document.createElement("li");
+        next.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+        next.innerHTML = `<a class="page-link" href="#">»</a>`;
+        next.addEventListener("click", e => {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        });
+        pagination.appendChild(next);
+    }
+
+    // Update "Showing X–Y of Z"
+    function updateEntriesInfo() {
+        const total = filteredRows.length;
+        const start = total ? (currentPage - 1) * rowsPerPage + 1 : 0;
+        const end = Math.min(currentPage * rowsPerPage, total);
+        entriesInfo.textContent = `Showing ${start}–${end} of ${total} appointments`;
+    }
+
+    // Search Filter
+    searchInput.addEventListener("input", () => {
+        const query = searchInput.value.toLowerCase();
+        filteredRows = allRows.filter(row => row.innerText.toLowerCase().includes(query));
+        currentPage = 1;
+        renderTable();
+    });
+
+    renderTable();
+});
+</script>
+{% endblock %}

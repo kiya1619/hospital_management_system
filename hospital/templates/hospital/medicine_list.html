@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Medicine List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="text-primary"><i class="fas fa-pills me-2"></i>Medicine List</h3>
+    <input
+      type="text"
+      id="searchInput"
+      class="form-control w-25"
+      placeholder="Search medicine..."
+      onkeyup="filterTable()"
+    />
+  </div>
+
+  {% if medicines %}
+  <div class="table-responsive shadow-sm">
+    <table class="table table-striped align-middle" id="medicineTable">
+      <thead class="table-primary">
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Quantity</th>
+          <th>Expiration Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for med in medicines %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="med-name">{{ med.name }}</td>
+          <td>
+            {% if med.stock_quantity > 0 %}
+            <span class="badge bg-success">{{ med.stock_quantity }}</span>
+            {% else %}
+            <span class="badge bg-danger">Out of Stock</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if med.expiry_date %}
+              {{ med.expiry_date|date:"Y-m-d" }}
+              {% if med.expiry_date < today %}
+                <span class="badge bg-danger ms-1">Expired</span>
+              {% endif %}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="d-flex justify-content-center mt-3">
+    <nav>
+      <ul class="pagination" id="pagination"></ul>
+    </nav>
+  </div>
+
+  {% else %}
+  <div class="alert alert-info mt-3">
+    No medicines available in the system.
+  </div>
+  {% endif %}
+</div>
+
+<!-- JavaScript for Search + Pagination -->
+<script>
+  const rowsPerPage = 10; // Number of rows per page
+  let currentPage = 1;
+
+  function displayTablePage(page) {
+    const table = document.getElementById("medicineTable");
+    const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+    const totalRows = rows.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+    const pagination = document.getElementById("pagination");
+
+    // Hide all rows first
+    for (let i = 0; i < totalRows; i++) rows[i].style.display = "none";
+
+    // Calculate visible range
+    const start = (page - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, totalRows);
+
+    for (let i = start; i < end; i++) rows[i].style.display = "";
+
+    // Update pagination buttons
+    pagination.innerHTML = "";
+    for (let i = 1; i <= totalPages; i++) {
+      pagination.innerHTML += `
+        <li class="page-item ${i === page ? 'active' : ''}">
+          <a class="page-link" href="#" onclick="displayTablePage(${i})">${i}</a>
+        </li>`;
+    }
+
+    currentPage = page;
+  }
+
+  function filterTable() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const table = document.getElementById("medicineTable");
+    const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+    for (let i = 0; i < rows.length; i++) {
+      const nameCell = rows[i].getElementsByClassName("med-name")[0];
+      if (nameCell) {
+        const text = nameCell.textContent.toLowerCase();
+        rows[i].style.display = text.includes(input) ? "" : "none";
+      }
+    }
+  }
+
+  // Initialize pagination on page load
+  document.addEventListener("DOMContentLoaded", () => displayTablePage(currentPage));
+</script>
+{% endblock %}

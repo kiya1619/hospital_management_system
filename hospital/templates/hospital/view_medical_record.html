@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-3">🩺 Patient Medical Record</h3>
+
+    <!-- Patient Selector -->
+    <form method="get" action="{% url 'view_medical_record' %}">
+        <div class="form-group mb-3">
+            <label for="patient">Select Patient</label>
+            <select name="patient_id" id="patient" class="form-control" onchange="this.form.submit()">
+                <option value="">-- Choose a patient --</option>
+                {% for p in patients %}
+                    <option value="{{ p.id }}" {% if selected_patient and p.id == selected_patient.id %}selected{% endif %}>
+                        {{ p.user.get_full_name|title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    {% if selected_patient %}
+        <div class="card mt-3 shadow p-3">
+            <h4>{{ selected_patient.user.get_full_name|title }}</h4>
+            <p><strong>Gender:</strong> {{ selected_patient.gender }}</p>
+            <p><strong>Age:</strong> {{ age }} years</p>
+            <p><strong>Phone:</strong> {{ selected_patient.phone }}</p>
+            <p><strong>Address:</strong> {{ selected_patient.address }}</p>
+
+            <hr>
+            <h5>🗓️ Appointments</h5>
+            <ul>
+                {% for a in appointments %}
+                    <li>{{ a.date_time|date:"Y-m-d H:i" }} - Dr. {{ a.doctor.get_full_name|title }} ({{ a.status|capfirst }})</li>
+                {% empty %}
+                    <li>No appointments found.</li>
+                {% endfor %}
+            </ul>
+
+            <hr>
+            <h5>💊 Prescriptions</h5>
+            <ul>
+                {% for p in prescriptions %}
+                    <li>
+                        <strong>Date:</strong> {{ p.date_created|date:"Y-m-d" }} <br>
+                        <strong>Doctor:</strong> Dr. {{ p.doctor.get_full_name|title }}<br>
+                        {% for pm in p.prescriptionmedicine_set.all %}
+                            - {{ pm.medicine.name }} (x{{ pm.quantity }})<br>
+                        {% endfor %}
+                        {% if not p.prescriptionmedicine_set.all %}
+                            <em>No medicines listed.</em>
+                        {% endif %}
+                    </li>
+                {% empty %}
+                    <li>No prescriptions found.</li>
+                {% endfor %}
+            </ul>
+
+            <hr>
+            <h5>🧪 Lab Requests</h5>
+<ul class="list-group">
+    {% for lab in lab_requests %}
+        <li class="list-group-item">
+            <p><strong>Status:</strong> {{ lab.status|capfirst }}</p>
+            <p><strong>Tests:</strong> {{ lab.tests|join:", " }}</p>
+
+            {% if lab.results %}
+                <p><strong>Results:</strong></p>
+                <ul class="mb-2">
+                    {% for test_name, result_text in lab.results.items %}
+                        <li><b>{{ test_name|title }}</b>: {{ result_text }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No results recorded yet.</p>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="list-group-item text-muted">No lab requests found.</li>
+    {% endfor %}
+</ul>
+
+
+            <hr>
+            <h5>🛏️ Bed Assignments</h5>
+            <ul>
+                {% for b in bed_assignments %}
+                    <li>
+                        <strong>Bed:</strong> {{ b.bed.bed_number }} - {{ b.bed.ward }} <br>
+                        <strong>Status:</strong> {{ b.bed.status|capfirst }} <br>
+                        <strong>Assigned By:</strong> Nurse {{ b.assigned_by.get_full_name|title }} <br>
+                        <strong>Date Assigned:</strong> {{ b.date_assigned|date:"Y-m-d H:i" }}
+                    </li>
+                {% empty %}
+                    <li>No bed assignments found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

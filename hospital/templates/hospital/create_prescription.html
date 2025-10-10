@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Create Prescription{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-10">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-gradient-primary text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-prescription me-2"></i>
+                        Create Prescription
+                    </h4>
+                    <span class="badge bg-light text-primary fs-6">{{ appointment.patient.user.get_full_name }}</span>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <!-- Patient Info Card -->
+                    <div class="card mb-4 border-0 bg-light">
+                        <div class="card-body py-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted mb-1">Patient Information</h6>
+                                    <h5 class="mb-0">{{ appointment.patient.user.get_full_name }}</h5>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <h6 class="text-muted mb-1">Appointment Date</h6>
+                                    <h5 class="mb-0">{{ appointment.date_time|date:"F j, Y" }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Medicine Selection Section -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">
+                            <i class="fas fa-pills me-2 text-primary"></i>
+                            Select Medicines
+                        </h5>
+                        
+                        <!-- Search Box -->
+                        <div class="input-group mb-3 shadow-sm">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" id="medicineSearch" class="form-control border-start-0" placeholder="Search medicines by name...">
+                        </div>
+                        
+                        <!-- Medicines List (Scrollable) -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Available Medicines</h6>
+                                    <span class="badge bg-primary" id="selectedCount">0 selected</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th width="5%">Select</th>
+                                                <th width="45%">Medicine Name</th>
+                                                <th width="25%">Dosage</th>
+                                                <th width="25%">Quantity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="medicineList">
+                                            {% for med in medicines %}
+                                            <tr class="medicine-item">
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input medicine-checkbox" type="checkbox" 
+                                                               name="medicines" value="{{ med.id }}" id="med{{ med.id }}">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <label class="form-check-label fw-medium" for="med{{ med.id }}">
+                                                        {{ med.name }}
+                                                    </label>
+                                                </td>
+                                                <td class="text-muted">{{ med.dosage }}</td>
+                                                <td>
+                                                    <input type="number" name="quantity_{{ med.id }}" 
+                                                           class="form-control form-control-sm quantity-input" 
+                                                           placeholder="Enter quantity" min="1" disabled>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="4" class="text-center py-4 text-muted">
+                                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                                    No medicines available in the database.
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">
+                            <i class="fas fa-sticky-note me-2 text-primary"></i>
+                            Additional Notes
+                        </h5>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-3">
+                                <textarea class="form-control border-0" name="notes" rows="4" 
+                                          placeholder="Enter prescription notes, dosage instructions, or any additional information..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between pt-3">
+                        <a href="#" class="btn btn-outline-secondary px-4">
+                            <i class="fas fa-arrow-left me-2"></i>Back
+                        </a>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save me-2"></i>Save Prescription
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 12px;
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    .table thead th {
+        border-bottom: 1px solid #e3e6f0;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #6e707e;
+    }
+    .table tbody tr:hover {
+        background-color: #f8f9fc;
+    }
+    .form-check-input:checked {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+    .quantity-input:disabled {
+        background-color: #f8f9fc;
+        opacity: 0.6;
+    }
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('medicineSearch');
+        const medicineItems = document.querySelectorAll('.medicine-item');
+        const checkboxes = document.querySelectorAll('.medicine-checkbox');
+        const quantityInputs = document.querySelectorAll('.quantity-input');
+        const selectedCount = document.getElementById('selectedCount');
+        
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            medicineItems.forEach(item => {
+                const medicineName = item.querySelector('label').textContent.toLowerCase();
+                if (medicineName.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        // Update quantity input state based on checkbox
+        checkboxes.forEach((checkbox, index) => {
+            checkbox.addEventListener('change', function() {
+                const quantityInput = quantityInputs[index];
+                if (this.checked) {
+                    quantityInput.disabled = false;
+                    quantityInput.focus();
+                } else {
+                    quantityInput.disabled = true;
+                    quantityInput.value = '';
+                }
+                updateSelectedCount();
+            });
+        });
+        
+        // Update selected count
+        function updateSelectedCount() {
+            const selected = document.querySelectorAll('.medicine-checkbox:checked').length;
+            selectedCount.textContent = `${selected} selected`;
+        }
+        
+        // Initialize selected count
+        updateSelectedCount();
+    });
+</script>
+{% endblock %}

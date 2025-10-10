@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Schedule Appointment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white text-center">
+                <h4>Schedule Appointment</h4>
+            </div>
+            <div class="card-body">
+            
+
+                <form method="POST" class="mb-4">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Patient</label>
+                            <select class="form-select" name="patient" required>
+                                <option value="">Select Patient</option>
+                                {% for p in patients %}
+                                    <option value="{{ p.id }}">{{ p.user.get_full_name | title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Doctor</label>
+                            <select class="form-select" name="doctor" required>
+                                <option value="">Select Doctor</option>
+                                {% for d in doctors %}
+                                    <option value="{{ d.id }}">Dr. {{ d.get_full_name | title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Date & Time</label>
+                        <input type="datetime-local" class="form-control" name="date_time" required>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">Schedule Appointment</button>
+                    </div>
+                </form>
+
+                <!-- Appointments Table -->
+                <h5 class="mt-4">All Appointments</h5>
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in appointments %}
+                        <tr>
+                            <td>{{ a.patient.user.get_full_name }}</td>
+                            <td>Dr. {{ a.doctor.get_full_name }}</td>
+                            <td>{{ a.date_time|date:"Y-m-d H:i" }}</td>
+                            <td>{{ a.status|capfirst }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">No appointments scheduled.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-center text-muted">
+                Hospital Management System
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

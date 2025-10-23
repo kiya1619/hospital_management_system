@@ -11,7 +11,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.crypto import get_random_string
 
-@role_required('admin')
 def create_user_view(request):
     if request.method == 'POST':
         first_name = request.POST.get('first_name')

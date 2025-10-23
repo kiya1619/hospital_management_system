@@ -1,29 +1,212 @@
-
-{% extends "base.html" %}
-
-{% block title %}Login{% endblock %}
-
-{% block content %}
-<div class="row justify-content-center">
-     
-    <div class="col-md-4">
-        {% if error %}
-            <div class="alert alert-danger mt-2">{{ error }}</div>
-        {% endif %}
-        <h3 class="text-center mb-3">Login</h3>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" class="form-control" name="username" required>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hospital Management System | Login</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    --primary: #1a73e8;
+    --primary-dark: #0d47a1;
+    --accent: #e8f0fe;
+    --dark: #202124;
+    --danger: #dc3545;
+}
+body {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.login-container {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 1000px;
+    width: 100%;
+}
+.login-left {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.login-right {
+    padding: 3rem;
+}
+.hospital-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+}
+.system-name {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+.system-subtitle {
+    color: #6c757d;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+.form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s;
+}
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(26, 115, 232, 0.25);
+}
+.form-label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+.btn-login {
+    background: linear-gradient(to right, var(--primary), var(--primary-dark));
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(26, 115, 232, 0.4);
+}
+.alert-danger {
+    border-radius: 8px;
+    border-left: 4px solid var(--danger);
+}
+.feature-list {
+    list-style-type: none;
+    padding: 0;
+}
+.feature-list li {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+.feature-list i {
+    background-color: rgba(255, 255, 255, 0.2);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 0.9rem;
+}
+.input-group {
+    position: relative;
+}
+.input-group .form-control {
+    padding-left: 2.5rem;
+}
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 5;
+}
+@media (max-width: 768px) {
+    .login-left, .login-right { padding: 2rem; }
+}
+</style>
+</head>
+<body>
+<div class="container my-5">
+    <div class="login-container">
+        <div class="row g-0">
+            <!-- Left Panel -->
+            <div class="col-lg-6">
+                <div class="login-left">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-hospital-alt fa-3x mb-3"></i>
+                        <h1 class="fw-bold">KiCare Hospital</h1>
+                        <p class="opacity-75">Advanced Healthcare Management System</p>
+                    </div>
+                    <h3 class="fw-bold mb-3">Streamlined Hospital Operations</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Patient Records Management</li>
+                        <li><i class="fas fa-check"></i> Appointment Scheduling</li>
+                        <li><i class="fas fa-check"></i> Billing & Invoicing</li>
+                        <li><i class="fas fa-check"></i> Pharmacy Inventory</li>
+                        <li><i class="fas fa-check"></i> Laboratory Integration</li>
+                        <li><i class="fas fa-check"></i> Staff Management</li>
+                    </ul>
+                    <p class="opacity-75 mt-4">Trusted by 150+ healthcare facilities nationwide</p>
+                </div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-control" name="password" required>
+
+            <!-- Right Panel -->
+            <div class="col-lg-6">
+                <div class="login-right">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-hospital-user hospital-icon"></i>
+                        <h2 class="system-name">Hospital Management System</h2>
+                        <p class="system-subtitle">Secure access to medical records and hospital operations</p>
+                    </div>
+
+
+                    
+
+                    <!-- Django Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Login Form -->
+                    <form method="POST" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-login w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to System
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted">Need help? Contact IT Support at <strong>support@kicarehospital.com</strong></p>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-        </form>
-       
+        </div>
     </div>
 </div>
-{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

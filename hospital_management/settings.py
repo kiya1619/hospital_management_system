@@ -25,8 +25,6 @@ SECRET_KEY = 'django-insecure-%=4t!5ieedws$frrd*o*!7*w((6yjk93v2wscm4o$d)o1%5u+$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['abdisa16.pythonanywhere.com']
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -78,27 +76,31 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'abdisa16$hospital_management',
-#         'USER': 'abdisa16',
-#         'PASSWORD': 'Werke@1619',
-#         'HOST': 'abdisa16.mysql.pythonanywhere-services.com',
-#         'PORT': '3306',
-#     }
-# }
 
+ALLOWED_HOSTS = ['abdisa16.pythonanywhere.com']
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hospital_management',       # PostgreSQL database name
-        'USER': 'postgres',       # PostgreSQL username
-        'PASSWORD': 'admin@123',  # PostgreSQL password
-        'HOST': 'localhost',          # Or your DB host
-        'PORT': '5432',               # Default PostgreSQL port
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'abdisa16$hospital_management',
+        'USER': 'abdisa16',
+        'PASSWORD': 'Werke@1619',
+        'HOST': 'abdisa16.mysql.pythonanywhere-services.com',
+        'PORT': '3306',
     }
 }
+
+
+# ALLOWED_HOSTS = []
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'hospital_management',       # PostgreSQL database name
+#         'USER': 'postgres',       # PostgreSQL username
+#         'PASSWORD': 'admin@123',  # PostgreSQL password
+#         'HOST': 'localhost',          # Or your DB host
+#         'PORT': '5432',               # Default PostgreSQL port
+#     }
+# }
 
 
 # Password validation

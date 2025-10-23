@@ -80,12 +80,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hospital_management',       # PostgreSQL database name
-        'USER': 'postgres',       # PostgreSQL username
-        'PASSWORD': 'admin@123',  # PostgreSQL password
-        'HOST': 'localhost',          # Or your DB host
-        'PORT': '5432',               # Default PostgreSQL port
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'abdisa16$hospital_management',
+        'USER': 'abdisa16',
+        'PASSWORD': 'Werke@1619',
+        'HOST': 'abdisa16.mysql.pythonanywhere-services.com',
+        'PORT': '3306',
     }
 }
 

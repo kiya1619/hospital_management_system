@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Hospital Management System{% endblock %}</title>
+<title>{% block title %}Kiyacare Hospital Management System{% endblock %}</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
@@ -25,7 +25,7 @@ body {
     width: var(--sidebar-width);
     background-color: var(--primary-color);
     color: #fff;
-    overflow: hidden;
+    overflow-y: auto;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -81,15 +81,18 @@ body {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Remove hover-based dropdown */
-.sidebar nav .dropdown-menu {
+/* Dropdowns */
+.sidebar .dropdown-menu {
     background: #1f4175;
     border-radius: 0.5rem;
-    margin-left: 0;
 }
 
-.sidebar nav .dropdown-toggle::after {
-    margin-left: auto;
+.sidebar .dropdown-menu a {
+    color: #fff;
+}
+
+.sidebar .dropdown-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Main Content */
@@ -115,10 +118,6 @@ body {
 }
 
 /* Profile Dropdown */
-.navbar-top .dropdown {
-    position: relative;
-}
-
 .navbar-top .dropdown-toggle {
     background: none;
     border: none;
@@ -157,13 +156,12 @@ body {
         {% if user.is_authenticated %}
             {% if user.role == 'admin' %}
                 <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-                    <i class="fas fa-tachometer-alt"></i><span> Dashboard</span>
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
 
-                <!-- User Management -->
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-users"></i><span> User Management</span>
+                        <i class="fas fa-users"></i> User Management
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'create_user' %}">Create User</a></li>
@@ -171,20 +169,18 @@ body {
                     </ul>
                 </div>
 
-                <!-- Medicine Management -->
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-pills"></i><span> Medicine Management</span>
+                        <i class="fas fa-pills"></i> Medicine Management
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'medicine_list' %}">View Medicines</a></li>
                     </ul>
                 </div>
 
-                <!-- Appointment Management -->
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-calendar-check"></i><span> Appointment Management</span>
+                        <i class="fas fa-calendar-check"></i> Appointments
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'view_appointments' %}">View Appointments</a></li>
@@ -192,10 +188,9 @@ body {
                     </ul>
                 </div>
 
-                <!-- Bed Management -->
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-bed"></i><span> Bed Management</span>
+                        <i class="fas fa-bed"></i> Bed Management
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'view_bedrooms' %}">View Bed Rooms</a></li>
@@ -203,6 +198,49 @@ body {
                     </ul>
                 </div>
 
+            {% elif user.role == 'doctor' %}
+                <a href="{% url 'doctor_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'doctor_dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="{% url 'my_appointments' %}" class="nav-link"><i class="fas fa-calendar-check"></i> My Appointments</a>
+                <a href="{% url 'view_medical_record' %}" class="nav-link"><i class="fas fa-file-medical"></i> Medical Records</a>
+
+            {% elif user.role == 'nurse' %}
+                <a href="{% url 'nurse_dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-bed"></i> Bed Management
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'add_bed' %}">Add Bed</a></li>
+                        <li><a class="dropdown-item" href="{% url 'view_bed_request' %}">View Requests</a></li>
+                        <li><a class="dropdown-item" href="{% url 'view_bedrooms' %}">View Bedrooms</a></li>
+                    </ul>
+                </div>
+                <a href="{% url 'patient_list_nurse_view' %}" class="nav-link"><i class="fas fa-user-injured"></i> Patients</a>
+
+            {% elif user.role == 'labtech' %}
+                <a href="{% url 'lab_dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="{% url 'lab_requests' %}" class="nav-link"><i class="fas fa-vial"></i> Lab Requests</a>
+
+            {% elif user.role == 'reception' %}
+                <a href="{% url 'reception_dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-injured"></i> Patient Management
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'register_patients' %}">Register Patient</a></li>
+                        <li><a class="dropdown-item" href="{% url 'patinet_list' %}">Patient List</a></li>
+                        <li><a class="dropdown-item" href="{% url 'schedule_appointment' %}">Schedule Appointment</a></li>
+                        <li><a class="dropdown-item" href="{% url 'manage_appointments' %}">Manage Appointments</a></li>
+                    </ul>
+                </div>
+
+            {% elif user.role == 'pharmacist' %}
+                <a href="{% url 'pharmacist_dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="{% url 'add_medicine' %}" class="nav-link"><i class="fas fa-pills"></i> Add Medicine</a>
+                <a href="{% url 'medicine_list' %}" class="nav-link"><i class="fas fa-list"></i> Medicine List</a>
             {% endif %}
         {% endif %}
     </nav>
@@ -227,23 +265,23 @@ body {
 
     <!-- Messages -->
     {% if messages %}
-        <div class="messages-container p-2">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="fas 
-                            {% if message.tags == 'success' %}fa-check-circle
-                            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
-                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
-                            {% elif message.tags == 'info' %}fa-info-circle
-                            {% else %}fa-bell{% endif %} 
-                            me-2"></i>
-                        <span>{{ message }}</span>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
+    <div class="messages-container p-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas 
+                    {% if message.tags == 'success' %}fa-check-circle
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
+                    {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                    {% elif message.tags == 'info' %}fa-info-circle
+                    {% else %}fa-bell{% endif %} 
+                    me-2"></i>
+                <span>{{ message }}</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        {% endfor %}
+    </div>
     {% endif %}
 
     <!-- Main Page Content -->

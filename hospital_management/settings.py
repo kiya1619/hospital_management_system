@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-%=4t!5ieedws$frrd*o*!7*w((6yjk93v2wscm4o$d)o1%5u+$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['abdisa16.pythonanywhere.com']
 
 
 # Application definition
@@ -68,9 +68,12 @@ TEMPLATES = [
         },
     },
 ]
+import os
 
 WSGI_APPLICATION = 'hospital_management.wsgi.application'
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

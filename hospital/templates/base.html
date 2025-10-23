@@ -1,373 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Hospital Management System{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #2c5aa0;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --info-color: #17a2b8;
-            --light-bg: #f8f9fa;
-        }
-        
-        body {
-            background-color: #f5f7fb;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-        
-        .nav-link {
-            font-weight: 500;
-            padding: 0.5rem 1rem !important;
-            border-radius: 0.375rem;
-            margin: 0 0.125rem;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.15);
-            font-weight: 600;
-        }
-        
-        .user-welcome {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 0.5rem 1rem;
-            margin-right: 1rem;
-        }
-        
-        .alert {
-            border: none;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .container {
-            max-width: 1400px;
-        }
-        
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-radius: 0.5rem;
-        }
-        
-        .dropdown-item {
-            padding: 0.5rem 1rem;
-            transition: all 0.2s ease;
-        }
-        
-        .dropdown-item:hover {
-            background-color: #f8f9fa;
-            padding-left: 1.25rem;
-        }
-        
-        .role-badge {
-            font-size: 0.7rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 1rem;
-        }
-        
-        @media (max-width: 768px) {
-            .nav-link {
-                margin: 0.125rem 0;
-            }
-            
-            .user-welcome {
-                margin: 0.5rem 0;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Hospital Management System{% endblock %}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+:root {
+    --primary-color: #2c5aa0;
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 70px;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fb;
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--primary-color);
+    color: #fff;
+    transition: width 0.3s;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+.sidebar .brand {
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar .brand i {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+.sidebar .user-welcome {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    margin: 1rem;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.3s;
+}
+
+.sidebar.collapsed .user-welcome {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sidebar nav {
+    flex-grow: 1;
+    padding: 0.5rem 0;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #fff;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.sidebar nav a i {
+    min-width: 25px;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar nav .dropdown-menu {
+    display: none;
+    flex-direction: column;
+    padding-left: 0;
+    margin-left: 1rem;
+    background: #1f4175;
+    border-radius: 0.5rem;
+}
+
+.sidebar nav .dropdown:hover .dropdown-menu {
+    display: flex;
+}
+
+.sidebar.collapsed nav a span {
+    display: none;
+}
+
+.content {
+    margin-left: var(--sidebar-width);
+    padding: 2rem;
+    width: 100%;
+    transition: margin-left 0.3s;
+}
+
+.sidebar.collapsed + .content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+.collapse-toggle {
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+</style>
 </head>
 <body>
-    <!-- Enhanced Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <i class="fas fa-hospital me-2"></i>
-                Kiyacare System
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    {% if user.is_authenticated %}
-                        {% if user.role == 'admin' %}
-    <!-- Dashboard -->
-    <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" 
-           href="{% url 'admin_dashboard' %}">
-            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-        </a>
-    </li>
 
-    <!-- User Management -->
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-users me-1"></i>User Management
-        </a>
-        <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'create_user' %}">Create User</a></li>
-            <li><a class="dropdown-item" href="{% url 'user_list' %}">User List</a></li>
-        </ul>
-    </li>
-
-    <!-- Medicine Management -->
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-pills me-1"></i>Medicine Management
-        </a>
-        <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'medicine_list' %}">View Medicines</a></li>
-        </ul>
-    </li>
-
-    <!-- Appointment Management -->
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-calendar-check me-1"></i>Appointment Management
-        </a>
-        <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'view_appointments' %}">View Appointments</a></li>
-        </ul>
-    </li>
-
-    <!-- Bed Management -->
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-bed me-1"></i>Bed Management
-        </a>
-        <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'view_bedrooms' %}">View Bed Rooms</a></li>
-            <li><a class="dropdown-item" href="{% url 'view_bed_request' %}">View Bed Requests</a></li>
-        </ul>
-    </li>
-
-                            
-                        {% elif user.role == 'doctor' %}
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'doctor_dashboard' %}active{% endif %}" 
-                                   href="{% url 'doctor_dashboard' %}">
-                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'my_appointments' %}active{% endif %}" 
-                                   href="{% url 'my_appointments' %}">
-                                    <i class="fas fa-calendar-check me-1"></i>Appointments
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'view_medical_record' %}active{% endif %}" 
-                                   href="{% url 'view_medical_record' %}">
-                                    <i class="fas fa-file-medical me-1"></i>Medical Records
-                                </a>
-                            </li>
-                            
-                        {% elif user.role == 'nurse' %}
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'nurse_dashboard' %}active{% endif %}" 
-                                   href="{% url 'nurse_dashboard' %}">
-                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-bed me-1"></i>Bed Management
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'add_bed' %}">Add Bed</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'view_bed_request' %}">Bed Requests</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'view_bedrooms' %}">View Bedrooms</a></li>
-                                </ul>
-                                
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-person me-1"></i>Patient Info
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'patient_list_nurse_view' %}">View Patients</a></li>
-                                    
-                                </ul>
-                                
-                            </li>
-                            
-                        {% elif user.role == 'labtech' %}
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'lab_dashboard' %}active{% endif %}" 
-                                   href="{% url 'lab_dashboard' %}">
-                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'lab_requests' %}active{% endif %}" 
-                                   href="{% url 'lab_requests' %}">
-                                    <i class="fas fa-vial me-1"></i>Lab Requests
-                                </a>
-                            </li>
-                            
-                        {% elif user.role == 'reception' %}
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'reception_dashboard' %}active{% endif %}" 
-                                   href="{% url 'reception_dashboard' %}">
-                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-user-injured me-1"></i>Patient Management
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'register_patients' %}">Register Patient</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'patinet_list' %}">Patient List</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'schedule_appointment' %}">Schedule Appointment</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'manage_appointments' %}">Manage Appointment</a></li>
-                                </ul>
-                            </li>
-                            
-                        {% elif user.role == 'pharmacist' %}
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'pharmacist_dashboard' %}active{% endif %}" 
-                                   href="{% url 'pharmacist_dashboard' %}">
-                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'add_medicine' %}active{% endif %}" 
-                                   href="{% url 'add_medicine' %}">
-                                    <i class="fas fa-pills me-1"></i>Add Medicine
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'medicine_medicine' %}active{% endif %}" 
-                                   href="{% url 'medicine_list' %}">
-                                    <i class="fas fa-pills me-1"></i>Medicine List
-                                </a>
-                            </li>
-                        {% endif %}
-                    {% endif %}
-                </ul>
-                
-                <ul class="navbar-nav ms-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <div class="user-welcome d-flex align-items-center">
-                                <i class="fas fa-user-circle me-2"></i>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-semibold">{{ user.get_full_name |title |default:user.username }}</span>
-                                    <small>
-                                        <span class="badge role-badge 
-                                            {% if user.role == 'admin' %}
-                                            {% elif user.role == 'doctor' %}
-                                            {% elif user.role == 'nurse' %}
-                                            {% elif user.role == 'labtech' %}
-                                            {% elif user.role == 'reception' %}
-                                            {% elif user.role == 'pharmacist' %}
-                                            {% else %}bg-secondary{% endif %}">
-                                            {{ user.get_role_display|default:user.role }}
-                                        </span>
-                                    </small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-cog"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-lock me-2"></i>Change Password</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Login
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="brand">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-hospital"></i>
+            <span>Kiyacare</span>
         </div>
-    </nav>
+        <i class="fas fa-ellipsis-h collapse-toggle" id="collapse-btn"></i>
+    </div>
 
-    <!-- Main Content -->
-    <div class="container mt-4">
-        <!-- Messages -->
-        {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i class="fas 
-                                {% if message.tags == 'success' %}fa-check-circle
-                                {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
-                                {% elif message.tags == 'warning' %}fa-exclamation-triangle
-                                {% elif message.tags == 'info' %}fa-info-circle
-                                {% else %}fa-bell{% endif %} 
-                                me-2"></i>
-                            <span>{{ message }}</span>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="user-welcome d-flex flex-column">
+        <span class="fw-semibold">{{ user.get_full_name |title |default:user.username }}</span>
+        <small>
+{% if user.is_authenticated %}
+    <span class="badge role-badge bg-secondary">
+        {{ user.get_role_display|default:user.role }}
+    </span>
+{% endif %}        </small>
+    </div>
+
+    <nav>
+        {% if user.is_authenticated %}
+            {% if user.role == 'admin' %}
+                <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i><span> Dashboard</span>
+                </a>
+                <div class="dropdown">
+                    <a href="#"><i class="fas fa-users"></i><span> User Management</span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'create_user' %}">Create User</a>
+                        <a class="dropdown-item" href="{% url 'user_list' %}">User List</a>
                     </div>
-                {% endfor %}
-            </div>
+                </div>
+                <div class="dropdown">
+                    <a href="#"><i class="fas fa-pills"></i><span> Medicine Management</span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'medicine_list' %}">View Medicines</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="#"><i class="fas fa-calendar-check"></i><span> Appointment Management</span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'view_appointments' %}">View Appointments</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="#"><i class="fas fa-bed"></i><span> Bed Management</span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'view_bedrooms' %}">View Bed Rooms</a>
+                        <a class="dropdown-item" href="{% url 'view_bed_request' %}">View Bed Requests</a>
+                    </div>
+                </div>
+
+            {% elif user.role == 'doctor' %}
+                <a href="{% url 'doctor_dashboard' %}" class="{% if request.resolver_match.url_name == 'doctor_dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i><span> Dashboard</span>
+                </a>
+                <a href="{% url 'my_appointments' %}" class="{% if request.resolver_match.url_name == 'my_appointments' %}active{% endif %}">
+                    <i class="fas fa-calendar-check"></i><span> Appointments</span>
+                </a>
+                <a href="{% url 'view_medical_record' %}" class="{% if request.resolver_match.url_name == 'view_medical_record' %}active{% endif %}">
+                    <i class="fas fa-file-medical"></i><span> Medical Records</span>
+                </a>
+
+            {% elif user.role == 'nurse' %}
+                <a href="{% url 'nurse_dashboard' %}" class="{% if request.resolver_match.url_name == 'nurse_dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i><span> Dashboard</span>
+                </a>
+                <div class="dropdown">
+                    <a href="#"><i class="fas fa-bed"></i><span> Bed Management</span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'add_bed' %}">Add Bed</a>
+                        <a class="dropdown-item" href="{% url 'view_bed_request' %}">Bed Requests</a>
+                        <a class="dropdown-item" href="{% url 'view_bedrooms' %}">View Bedrooms</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="#"><i class="fas fa-person"></i><span> Patient Info</span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'patient_list_nurse_view' %}">View Patients</a>
+                    </div>
+                </div>
+
+            {% elif user.role == 'labtech' %}
+                <a href="{% url 'lab_dashboard' %}" class="{% if request.resolver_match.url_name == 'lab_dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i><span> Dashboard</span>
+                </a>
+                <a href="{% url 'lab_requests' %}" class="{% if request.resolver_match.url_name == 'lab_requests' %}active{% endif %}">
+                    <i class="fas fa-vial"></i><span> Lab Requests</span>
+                </a>
+
+            {% elif user.role == 'reception' %}
+                <a href="{% url 'reception_dashboard' %}" class="{% if request.resolver_match.url_name == 'reception_dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i><span> Dashboard</span>
+                </a>
+                <div class="dropdown">
+                    <a href="#"><i class="fas fa-user-injured"></i><span> Patient Management</span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'register_patients' %}">Register Patient</a>
+                        <a class="dropdown-item" href="{% url 'patinet_list' %}">Patient List</a>
+                        <a class="dropdown-item" href="{% url 'schedule_appointment' %}">Schedule Appointment</a>
+                        <a class="dropdown-item" href="{% url 'manage_appointments' %}">Manage Appointment</a>
+                    </div>
+                </div>
+
+            {% elif user.role == 'pharmacist' %}
+                <a href="{% url 'pharmacist_dashboard' %}" class="{% if request.resolver_match.url_name == 'pharmacist_dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i><span> Dashboard</span>
+                </a>
+                <a href="{% url 'add_medicine' %}" class="{% if request.resolver_match.url_name == 'add_medicine' %}active{% endif %}">
+                    <i class="fas fa-pills"></i><span> Add Medicine</span>
+                </a>
+                <a href="{% url 'medicine_list' %}" class="{% if request.resolver_match.url_name == 'medicine_list' %}active{% endif %}">
+                    <i class="fas fa-pills"></i><span> Medicine List</span>
+                </a>
+            {% endif %}
+            <a href="{% url 'logout' %}" >
+                    <i class="fas fa-pills"></i><span> Logout</span>
+                </a>
         {% endif %}
+    </nav>
+</div>
 
-        <!-- Page Content -->
-        <main class="my-4">
-            {% block content %}{% endblock %}
-        </main>
-    </div>
+<!-- Main Content -->
+<div class="content">
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas 
+                            {% if message.tags == 'success' %}fa-check-circle
+                            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
+                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                            {% elif message.tags == 'info' %}fa-info-circle
+                            {% else %}fa-bell{% endif %} 
+                            me-2"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-<!-- Footer -->
-<!-- <footer class="bg-dark text-light py-3 mt-5 text-center">
-    <div class="container">
-        <small>kiya solution @2025</small>
-    </div>
-</footer> -->
+    <main class="my-4">
+        {% block content %}{% endblock %}
+    </main>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const sidebar = document.getElementById('sidebar');
+const collapseBtn = document.getElementById('collapse-btn');
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Add active class based on current page
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentUrl = window.location.pathname;
-            const navLinks = document.querySelectorAll('.nav-link');
-            
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentUrl) {
-                    link.classList.add('active');
-                }
-            });
-        });
-    </script>
+collapseBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+});
+</script>
 </body>
 </html>

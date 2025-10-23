@@ -9,6 +9,8 @@ from django.utils import timezone
 from datetime import date
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.utils.crypto import get_random_string
+
 @role_required('admin')
 def create_user_view(request):
     if request.method == 'POST':
@@ -262,9 +264,6 @@ def register_patients(request):
         # User fields
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
 
         # Patient fields
         dob = request.POST.get('dob')
@@ -274,12 +273,12 @@ def register_patients(request):
 
         # Create the User
         user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password,
+            
             role='patient',
             first_name=first_name,
-            last_name=last_name
+            last_name=last_name,
+            username = f"{first_name.lower()}{last_name.lower()}{get_random_string(5)}",
+            password=None
         )
 
         # Create the Patient

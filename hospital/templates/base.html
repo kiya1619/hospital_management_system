@@ -215,9 +215,10 @@ body {
                         <li><a class="dropdown-item" href="{% url 'add_bed' %}">Add Bed</a></li>
                         <li><a class="dropdown-item" href="{% url 'view_bed_request' %}">View Requests</a></li>
                         <li><a class="dropdown-item" href="{% url 'view_bedrooms' %}">View Bedrooms</a></li>
+                        <a href="{% url 'patient_list_nurse_view' %}" class="nav-link"><i class="fas fa-user-injured"></i> Patients info</a>
+
                     </ul>
                 </div>
-                <a href="{% url 'patient_list_nurse_view' %}" class="nav-link"><i class="fas fa-user-injured"></i> Patients</a>
 
             {% elif user.role == 'labtech' %}
                 <a href="{% url 'lab_dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>

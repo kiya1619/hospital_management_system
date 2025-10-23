@@ -10,12 +10,17 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <input type="text" id="searchInput" class="form-control" placeholder="Search appointment...">
+       
         </div>
+        {% if user.role == 'reception' %}
         <a href="{% url 'schedule_appointment' %}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add Appointment
         </a>
-    </div>
+        {% else %}
+    {% endif %}
 
+    </div>
+    
     <!-- Appointment Table -->
     <div class="table-responsive">
         <table class="table table-striped table-hover align-middle" id="appointmentTable">

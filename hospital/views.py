@@ -650,7 +650,7 @@ def view_medical_record(request):
         
         # Calculate age
         today = date.today()
-        age = today.year - selected_patient.age
+        age = selected_patient.age
 
         # Fetch related data
         appointments = Appointment.objects.filter(patient=selected_patient)

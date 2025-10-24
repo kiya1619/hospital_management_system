@@ -17,6 +17,7 @@ def create_user_view(request):
         last_name = request.POST.get('last_name')
         username = request.POST.get('username')
         email = request.POST.get('email')
+        phone = request.POST.get('phone')
         password = request.POST.get('password')
         role = request.POST.get('role')
 
@@ -24,6 +25,7 @@ def create_user_view(request):
         user = User.objects.create_user(
             username=username,
             email=email,
+            phone=phone,
             password=password,
             role=role,
             first_name=first_name,
@@ -257,7 +259,7 @@ def delete_user(request, user_id):
     return redirect('user_list')
 
 
-@role_required('reception')
+@role_required('reception', 'admin')
 def register_patients(request):
     if request.method == 'POST':
         # User fields
@@ -265,7 +267,7 @@ def register_patients(request):
         last_name = request.POST.get('last_name')
 
         # Patient fields
-        dob = request.POST.get('dob')
+        age = request.POST.get('age')
         gender = request.POST.get('gender')
         phone = request.POST.get('phone')
         address = request.POST.get('address')
@@ -283,7 +285,7 @@ def register_patients(request):
         # Create the Patient
         patient = Patient.objects.create(
             user=user,
-            dob=dob,
+            age=age,
             gender=gender,
             phone=phone,
             address=address,
@@ -331,12 +333,30 @@ def schedule_appointment(request):
         'appointments': appointments
     })
 def my_appointments(request):
-    appointments = Appointment.objects.filter(doctor=request.user).order_by('date_time')
+    show_completed = request.GET.get('show_completed') == 'true'
+
+    if show_completed:
+        # Show only completed appointments (never show canceled)
+        appointments = Appointment.objects.filter(
+            doctor=request.user,
+            status='completed'
+        ).order_by('-date_time')
+    else:
+        # Show all except completed and canceled
+        appointments = Appointment.objects.filter(
+            doctor=request.user
+        ).exclude(status__in=['completed', 'canceled']).order_by('-date_time')
+
+    # Add extra fields for display logic
     for a in appointments:
         a.has_prescription = a.prescriptions.exists()
         a.lab_completed = a.lab_requests.filter(status='completed').exists()
         a.bed_fulfilled = a.bed_requests.filter(status='fulfilled').exists()
-    return render(request, 'hospital/my_appointments.html', {'appointments': appointments})
+
+    return render(request, 'hospital/my_appointments.html', {
+        'appointments': appointments,
+        'show_completed': show_completed,
+    })
 def create_prescription(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
     medicines = Medicine.objects.all()  # List all medicines
@@ -372,7 +392,7 @@ def create_prescription(request, appointment_id):
         'appointment': appointment,
         'medicines': medicines
     })
-@role_required('pharmacist')    
+@role_required('pharmacist', 'admin')    
 def add_medicine(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -630,9 +650,7 @@ def view_medical_record(request):
         
         # Calculate age
         today = date.today()
-        age = today.year - selected_patient.dob.year - (
-            (today.month, today.day) < (selected_patient.dob.month, selected_patient.dob.day)
-        )
+        age = today.year - selected_patient.age
 
         # Fetch related data
         appointments = Appointment.objects.filter(patient=selected_patient)
@@ -699,7 +717,7 @@ def view_bedrooms(request):
 def view_appointments(request):
     appointments = Appointment.objects.all().order_by('-date_time')
     return render(request, 'hospital/view_appointments.html', {'appointments': appointments})
-@role_required('nurse')
+@role_required('nurse','admin')
 def patient_list_nurse_view(request):
     bed_requests = BedRequest.objects.select_related(
         'appointment__patient__user', 
@@ -739,3 +757,36 @@ def expired_medicine_report(request):
     return render(request, 'hospital/expired_medicine_report.html', {
         'expired_medicines': expired_medicines
     })
+
+
+def edit_user(request, user_id):
+    edit_user = get_object_or_404(User, id=user_id)  # user being edited
+
+    if request.method == 'POST':
+        edit_user.first_name = request.POST.get('first_name', edit_user.first_name)
+        edit_user.last_name = request.POST.get('last_name', edit_user.last_name)
+        edit_user.email = request.POST.get('email', edit_user.email)
+        edit_user.phone = request.POST.get('phone', edit_user.phone)
+        edit_user.address = request.POST.get('address', edit_user.address)
+        edit_user.role = request.POST.get('role', edit_user.role)
+        edit_user.is_active = True if request.POST.get('is_active') == 'on' else False
+        edit_user.is_staff = True if request.POST.get('is_staff') == 'on' else False
+        edit_user.save()
+        messages.success(request, 'User updated successfully.')
+        return redirect('user_list')
+
+    return render(request, 'hospital/edit_user.html', {'edit_user': edit_user})
+
+
+def edit_patient(request, user_id):
+    patient = get_object_or_404(Patient, id=user_id)
+
+    if request.method == 'POST':
+        patient.phone = request.POST.get('phone', patient.phone)
+        patient.address = request.POST.get('address', patient.address)
+        patient.age = request.POST.get('age', patient.age)
+        patient.save()
+        messages.success(request, 'Patient information updated successfully.')
+        return redirect('patinet_list')
+
+    return render(request, 'hospital/edit_patient.html', {'patient': patient})

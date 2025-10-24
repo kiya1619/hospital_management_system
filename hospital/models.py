@@ -40,7 +40,7 @@ class User(AbstractUser):
 class Patient(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'role':'patient'})
-    dob = models.DateField()
+    age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(max_length=10)
     current_bed = models.ForeignKey('Bed', on_delete=models.SET_NULL, null=True, blank=True, related_name='current_patient')
     phone = models.CharField(max_length=15, blank=True, null=True)

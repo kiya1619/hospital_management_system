@@ -470,7 +470,7 @@ def fill_lab_request(request, request_id):
     lab_request = get_object_or_404(LabRequest, id=request_id)
 
     # Only allow lab technicians to update results
-    if request.user.role != 'labtech':
+    if request.user.role not in ['Admin', 'admin', 'labtech'] :
         messages.error(request, "You are not authorized to update this request.")
         return redirect('lab_requests')
 
@@ -546,7 +546,7 @@ def view_bed_request(request):
 
 def fulfill_bed_request(request, bed_request_id):
     # Ensure only nurses can fulfill
-    if request.user.role != 'nurse':
+    if request.user.role in['nurse'] :
         messages.error(request, "You are not authorized to fulfill bed requests.")
         return redirect('view_bed_request')
 

@@ -442,7 +442,7 @@
             <nav class="navbar">
                 <a href="#" class="logo">
                     <i class="fas fa-hospital"></i>
-                    <span>MediCare</span>
+                    <span>CareNet </span>
                 </a>
                 
                 <ul class="nav-links">
@@ -580,8 +580,7 @@
     <script>
         // Simple function to toggle mobile menu (for demonstration)
         function toggleLogin() {
-            const loginSection = document.getElementById('login');
-            loginSection.scrollIntoView({ behavior: 'smooth' });
+    window.location.href = "{% url 'login' %}";
         }
         
         // Mobile menu toggle (if needed in the future)

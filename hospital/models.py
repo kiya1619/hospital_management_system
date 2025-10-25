@@ -14,6 +14,7 @@ class User(AbstractUser):
         ('reception', 'Receptionist'),
         ('pharmacist', 'Pharmacist'),
         ('patient', 'Patient'),
+        ('admin', 'Admin'),
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     phone = models.CharField(max_length=20, blank=True, null=True)

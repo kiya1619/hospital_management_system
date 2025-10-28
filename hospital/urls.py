@@ -22,8 +22,11 @@ urlpatterns = [
     path('create_prescription/<uuid:appointment_id>/', views.create_prescription, name='create_prescription'),
     path('edit_user/<uuid:user_id>', views.edit_user, name='edit_user'),
     path('edit_patient/<uuid:user_id>', views.edit_patient, name='edit_patient'),
+    path('delete_medicine/<uuid:medicine_id>', views.delete_medicine, name='delete_medicine'),
 
+    path('accounts/login/', views.login_view, name='login'),
 
+    path('check-username/', views.check_username, name='check_username'),
 
     path('add_medicine/', views.add_medicine, name='add_medicine'),
     path('view_prescription/<uuid:appointment_id>', views.view_prescription, name='view_prescription'),
@@ -31,7 +34,6 @@ urlpatterns = [
     path('lab_requests/', views.lab_requests, name='lab_requests'),
     path('fill_lab_request/<uuid:request_id>/', views.fill_lab_request, name='fill_lab_request'),
     path('view_lab_request/<uuid:request_id>/', views.view_lab_request, name='view_lab_request'),
-    path('view_lab_test/<uuid:lab_request_id>/', views.view_lab_test, name='view_lab_test'),
     path('request_bed/<uuid:appointment_id>/', views.request_bed, name='request_bed'),
     path('view_bed_request/', views.view_bed_request, name='view_bed_request'),
     path('assign_bed/<uuid:bed_request_id>/', views.assign_bed, name='assign_bed'),
@@ -44,7 +46,8 @@ urlpatterns = [
     path('view_appointments/', views.view_appointments, name='view_appointments'),
     path('appointments/complete/<uuid:id>/', views.complete_appointment, name='complete_appointment'),
     path('appointments/cancel/<uuid:id>/', views.cancel_appointment, name='cancel_appointment'),
-    path('patient_list_nurse_view/', views.patient_list_nurse_view, name='patient_list_nurse_view'),
+    path('edit_appointment/<uuid:appointment_id>/', views.edit_appointment, name='edit_appointment'),
+    path('patient_list_view/', views.patient_list_view, name='patient_list_view'),
     path('release-bed/<uuid:bed_id>/', views.release_bed, name='release_bed'),
     path('medical-report/<uuid:appointment_id>/', views.medical_report, name='medical_report'),
     path('expired_medicine_report/', views.expired_medicine_report, name='expired_medicine_report'),

@@ -14,21 +14,24 @@
 
                 <!-- Patient User Info (Read Only) -->
                 <div class="row mb-3">
+                  
                     <div class="col-md-6">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control" value="{{ patient.user.username }}" readonly>
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" name = 'firstname' id = 'firstname'  value="{{ patient.user.first_name }}" >
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" class="form-control" value="{{ patient.user.get_full_name }}" readonly>
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" name="lastname" id  = 'lastname' value="{{ patient.user.last_name }}" >
                     </div>
+           
                 </div>
 
                 <!-- Editable Fields -->
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label"></label>
-                        Age<input type="number" name="age" class="form-control" required>
+                        Age<input type="number" name="age" value="{{ patient.age }}" class="form-control" required>
+                        
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Gender</label>

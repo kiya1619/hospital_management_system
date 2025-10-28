@@ -7,10 +7,17 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from datetime import date
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.crypto import get_random_string
-
+from django.db import IntegrityError
+def check_username(request):
+    username = request.GET.get('username', '').strip()
+    exists = User.objects.filter(username__iexact=username).exists()
+    return JsonResponse({'exists': exists})
+@login_required
+@role_required('admin')
 def create_user_view(request):
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
@@ -21,22 +28,34 @@ def create_user_view(request):
         password = request.POST.get('password')
         role = request.POST.get('role')
 
-        # Create user
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            phone=phone,
-            password=password,
-            role=role,
-            first_name=first_name,
-            last_name=last_name
-        )
-        messages.success(request, f'User {username} created successfully as {role}.')
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            messages.error(request, f"Username '{username}' already exists. Please choose another one.")
+            return redirect('create_user')
 
-        return redirect('create_user')  # redirect after creation
+        # Optionally check for duplicate email
+        if email and User.objects.filter(email=email).exists():
+            messages.warning(request, f"Email '{email}' is already used by another account.")
+            return redirect('create_user')
+
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                phone=phone,
+                password=password,
+                role=role,
+                first_name=first_name,
+                last_name=last_name
+            )
+            messages.success(request, f'User {username} created successfully as {role}.')
+        except IntegrityError:
+            messages.error(request, "An unexpected error occurred while creating the user. Please try again.")
+        
+        return redirect('create_user')
+
     roles = ['admin', 'doctor', 'nurse', 'reception', 'labtech', 'pharmacist', 'patient']
     return render(request, 'hospital/create_user.html', {'roles': roles})
-
 def home_view(request):
     return render(request, 'hospital/home.html')
 def login_view(request):
@@ -63,12 +82,14 @@ def login_view(request):
             else:
                 return redirect('login')
         else:
-            return render(request, 'hospital/login.html', {'error': 'Invalid username or password'})
+            messages.error(request, "Invalid username or password")  # 👈 use messages
+            return redirect('login')  # redirect so the message is visible
     return render(request, 'hospital/login.html')
-
 def logout_view(request):
     logout(request)
     return redirect('login')
+@login_required
+@role_required('admin')
 def admin_dashboard(request):
     # Patients
     total_patients = Patient.objects.count()
@@ -115,7 +136,8 @@ def admin_dashboard(request):
         'maintenance_beds': maintenance_beds,
     }
     return render(request, 'dashboards/admin_dashboard.html', context)
-
+@login_required
+@role_required('pharmacist', 'admin')
 def pharmacist_dashboard(request):
     today = timezone.now().date()
 
@@ -146,6 +168,8 @@ def pharmacist_dashboard(request):
         'medicines': medicines,
     }
     return render(request, 'dashboards/pharmacist_dashboard.html', context)
+@login_required
+@role_required('doctor', 'admin')
 def doctor_dashboard(request):
     doctor = request.user
     
@@ -177,6 +201,8 @@ def doctor_dashboard(request):
     }
     
     return render(request, 'dashboards/doctor_dashboard.html',context)
+@login_required
+@role_required('nurse', 'admin')
 def nurse_dashboard(request):
     # Counts
     total_beds = Bed.objects.count()
@@ -202,6 +228,8 @@ def nurse_dashboard(request):
     }
 
     return render(request, 'dashboards/nurse_dashboard.html', context)
+@login_required
+@role_required('labtech', 'admin')
 def lab_dashboard(request):
     total_requests = LabRequest.objects.count()
 
@@ -225,6 +253,8 @@ def lab_dashboard(request):
         'upcoming_requests': upcoming_requests,
     }
     return render(request, 'dashboards/lab_dashboard.html', context)
+@login_required
+@role_required('reception', 'admin')
 def reception_dashboard(request):
     total_patients = Patient.objects.count()
     total_appointments = Appointment.objects.count()
@@ -245,10 +275,13 @@ def reception_dashboard(request):
         'upcoming_appointments': upcoming_appointments,
     }
     return render(request, 'dashboards/reception_dashboard.html', context)
+@login_required
+@role_required('admin')
 def user_list_view(request):
     users = User.objects.all()
     return render(request, 'hospital/user_list.html', {'users': users})
-
+@login_required
+@role_required('admin')
 def delete_user(request, user_id):
     try:
         user = User.objects.get(id=user_id)
@@ -295,8 +328,8 @@ def register_patients(request):
         return redirect('register_patients')
 
     return render(request, 'hospital/register_patients.html')
-
-
+@login_required
+@role_required('reception', 'admin')
 def schedule_appointment(request):
     patients = Patient.objects.all()
     doctors = User.objects.filter(role='doctor')
@@ -332,6 +365,8 @@ def schedule_appointment(request):
         'doctors': doctors,
         'appointments': appointments
     })
+@login_required
+@role_required('doctor', 'admin')
 def my_appointments(request):
     show_completed = request.GET.get('show_completed') == 'true'
 
@@ -357,6 +392,7 @@ def my_appointments(request):
         'appointments': appointments,
         'show_completed': show_completed,
     })
+@login_required
 def create_prescription(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
     medicines = Medicine.objects.all()  # List all medicines
@@ -393,6 +429,8 @@ def create_prescription(request, appointment_id):
         'medicines': medicines
     })
 @role_required('pharmacist', 'admin')    
+@login_required
+@role_required('pharmacist', 'admin')
 def add_medicine(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -412,7 +450,8 @@ def add_medicine(request):
 
     medicines = Medicine.objects.all()
     return render(request, 'hospital/add_medicine.html', {'medicines': medicines})
-
+@login_required
+@role_required('doctor', 'admin')
 def view_prescription(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
     prescription = Prescription.objects.filter(appointment=appointment).first()  # usually one per appointment
@@ -426,7 +465,8 @@ def view_prescription(request, appointment_id):
         'prescription': prescription,
         'prescribed_medicines': prescribed_medicines
     })
-
+@login_required
+@role_required('doctor', 'admin')
 def request_lab_test(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
 
@@ -462,10 +502,13 @@ def request_lab_test(request, appointment_id):
         'appointment': appointment,
         'lab_tests': lab_tests
     })
-
+@login_required
+@role_required('labtech', 'admin')
 def lab_requests(request):
     requests = LabRequest.objects.all().order_by('-date_created')
     return render(request, 'hospital/lab_requests.html', {'requests': requests})
+@login_required
+@role_required('labtech', 'admin')
 def fill_lab_request(request, request_id):
     lab_request = get_object_or_404(LabRequest, id=request_id)
 
@@ -496,7 +539,9 @@ def fill_lab_request(request, request_id):
         return redirect('lab_requests')
 
     return render(request, 'hospital/fill_lab_request.html', {'lab_request': lab_request})
-@role_required('labtech')
+@role_required('labtech', 'admin')
+@login_required
+@role_required('labtech', 'admin')
 def view_lab_request(request, request_id):
     lab_request = get_object_or_404(LabRequest, id=request_id)
 
@@ -506,18 +551,9 @@ def view_lab_request(request, request_id):
         return redirect('lab_requests')
 
     return render(request, 'hospital/view_lab_request.html', {'lab_request': lab_request})
-@role_required('doctor')
-def view_lab_test(request, lab_request_id):
-    """
-    Doctor can view lab results filled by the lab technician.
-    """
-    lab_request = get_object_or_404(LabRequest, id=lab_request_id)
 
-    return render(request, 'hospital/view_lab_test.html', {
-        'lab_request': lab_request
-    })
-
-
+@login_required
+@role_required('doctor', 'admin')
 def request_bed(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
 
@@ -536,14 +572,16 @@ def request_bed(request, appointment_id):
     return render(request, 'hospital/request_bed.html', {
         'appointment': appointment
     })
-
+@login_required
+@role_required('nurse', 'admin')
 def view_bed_request(request):
     bed_requests = BedRequest.objects.all().order_by('-date_requested')
     context = {
         'bed_requests': bed_requests
     }
     return render(request, 'hospital/view_bed_request.html', context)
-
+@login_required
+@role_required('nurse', 'admin')
 def fulfill_bed_request(request, bed_request_id):
     # Ensure only nurses can fulfill
     if request.user.role in['nurse'] :
@@ -564,7 +602,8 @@ def fulfill_bed_request(request, bed_request_id):
 
     messages.success(request, f"Bed request for {bed_request.appointment.patient.user.get_full_name} has been fulfilled.")
     return redirect('view_bed_request')
-
+@login_required
+@role_required('nurse', 'admin')
 def assign_bed(request, bed_request_id):
     bed_request = get_object_or_404(BedRequest, id=bed_request_id)
 
@@ -599,6 +638,8 @@ def assign_bed(request, bed_request_id):
         'bed_request': bed_request,
         'available_beds': available_beds
     })
+@login_required
+@role_required('nurse', 'admin')
 def add_bed(request):
     wards = ['General', 'ICU', 'Maternity', 'Pediatrics', 'Surgery']  # predefined wards
     suggested_number = ''
@@ -634,6 +675,8 @@ def add_bed(request):
         'suggested_numbers': suggested_numbers
     })
 
+@login_required
+@role_required('doctor', 'nurse', 'admin')
 def view_medical_record(request):
     patients = Patient.objects.all()
 
@@ -669,16 +712,19 @@ def view_medical_record(request):
     }
     return render(request, 'hospital/view_medical_record.html', context)
 
-
+@login_required
+@role_required('reception','admin')
 def patinet_list(request):
     patients = Patient.objects.all()
     return render(request, 'hospital/patinet_list.html', {'patients': patients})
 
-
+@login_required
+@role_required('reception','admin')
 def manage_appointments(request):
     appointments = Appointment.objects.all().order_by('-date_time')
     return render(request, 'hospital/manage_appointments.html', {'appointments': appointments})
-
+@login_required
+@role_required('doctor','admin')
 def complete_appointment(request, id):
     appointment = get_object_or_404(Appointment, id=id)
     if request.method == 'POST':
@@ -690,7 +736,8 @@ def complete_appointment(request, id):
         else:
             messages.warning(request, 'Appointment is already completed or canceled.')
             return redirect('my_appointments')
-      
+@login_required
+@role_required('reception','admin')      
 def cancel_appointment(request, id):
     appointment = get_object_or_404(Appointment, id=id)
     
@@ -704,21 +751,24 @@ def cancel_appointment(request, id):
     
     return redirect('manage_appointments') 
 
-
+@login_required
+@role_required('pharmacist','admin')
 def medicine_list(request):
     medicines = Medicine.objects.all().order_by('name')
     return render(request, 'hospital/medicine_list.html', {'medicines': medicines})
 
-
+@login_required
+@role_required('nurse','admin')
 def view_bedrooms(request):
     beds = Bed.objects.all().order_by('ward', 'bed_number')
     return render(request, 'hospital/view_bedrooms.html', {'beds': beds})
-
+@login_required
+@role_required('reception','admin')
 def view_appointments(request):
     appointments = Appointment.objects.all().order_by('-date_time')
     return render(request, 'hospital/view_appointments.html', {'appointments': appointments})
 @role_required('nurse','admin')
-def patient_list_nurse_view(request):
+def patient_list_view(request):
     bed_requests = BedRequest.objects.select_related(
         'appointment__patient__user', 
         'requested_by',
@@ -726,8 +776,9 @@ def patient_list_nurse_view(request):
     ).prefetch_related('assignment__bed').order_by('-date_requested')
 
     context = {'bed_requests': bed_requests}
-    return render(request, 'hospital/patient_list_nurse_view.html', context)
-
+    return render(request, 'hospital/patient_list_view.html', context)
+@ login_required
+@role_required('nurse','admin')
 def release_bed(request, bed_id):
     assignment = get_object_or_404(BedAssignment, id=bed_id)
     if request.method == "POST":
@@ -738,7 +789,8 @@ def release_bed(request, bed_id):
         messages.success(request, f"Bed {assignment.bed.bed_number} has been released.")
     return redirect('patient_list_nurse_view')
 
-
+@login_required
+@role_required('doctor', 'admin')
 def medical_report(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
     # Only allow completed appointments
@@ -750,7 +802,7 @@ def medical_report(request, appointment_id):
         'appointment': appointment
     })
 
-
+@login_required
 def expired_medicine_report(request):
     today = timezone.now().date()
     expired_medicines = Medicine.objects.filter(expiry_date__lt=today).order_by('expiry_date')
@@ -758,7 +810,8 @@ def expired_medicine_report(request):
         'expired_medicines': expired_medicines
     })
 
-
+@login_required
+@role_required('admin')
 def edit_user(request, user_id):
     edit_user = get_object_or_404(User, id=user_id)  # user being edited
 
@@ -777,16 +830,71 @@ def edit_user(request, user_id):
 
     return render(request, 'hospital/edit_user.html', {'edit_user': edit_user})
 
-
+@login_required
+@role_required('reception','admin')
 def edit_patient(request, user_id):
     patient = get_object_or_404(Patient, id=user_id)
 
     if request.method == 'POST':
+        patient.user.first_name = request.POST.get('firstname', patient.user.first_name)
+        patient.user.last_name = request.POST.get('lastname', patient.user.last_name)
         patient.phone = request.POST.get('phone', patient.phone)
         patient.address = request.POST.get('address', patient.address)
+        patient.gender = request.POST.get('gender', patient.gender)
         patient.age = request.POST.get('age', patient.age)
         patient.save()
+        patient.user.save()
         messages.success(request, 'Patient information updated successfully.')
         return redirect('patinet_list')
 
+
     return render(request, 'hospital/edit_patient.html', {'patient': patient})
+
+@login_required
+@role_required('pharmacist','admin')
+def delete_medicine(request, medicine_id):
+    medicine = get_object_or_404(Medicine, id=medicine_id)
+    medicine.delete()
+    messages.success(request, f'Medicine {medicine.name} deleted successfully.')
+    return redirect('medicine_list')
+
+@login_required
+@role_required('admin', 'reception')
+def edit_appointment(request, appointment_id):
+    # Get the appointment or 404
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    # Get all patients and doctors for dropdowns
+    patients = Patient.objects.all()
+    doctors = User.objects.filter(role='doctor')
+
+    if request.method == 'POST':
+        patient_id = request.POST.get('patient')
+        doctor_id = request.POST.get('doctor')
+        date_time = request.POST.get('date_time')
+        status = request.POST.get('status')
+
+        # Basic validation
+        if not all([patient_id, doctor_id, date_time, status]):
+            messages.error(request, "All fields are required.")
+            return render(request, 'hospital/edit_appointment.html', {
+                'appointment': appointment,
+                'patients': patients,
+                'doctors': doctors
+            })
+
+        # Update the appointment
+        appointment.patient_id = patient_id
+        appointment.doctor_id = doctor_id
+        appointment.date_time = date_time
+        appointment.status = status
+        appointment.save()
+
+        messages.success(request, "Appointment updated successfully.")
+        return redirect('manage_appointments')  # Redirect to your appointments list page
+
+    return render(request, 'hospital/edit_appointment.html', {
+        'appointment': appointment,
+        'patients': patients,
+        'doctors': doctors
+    })

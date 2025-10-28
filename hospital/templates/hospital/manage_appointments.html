@@ -1,36 +1,33 @@
 {% extends "base.html" %}
-
 {% block title %}Manage Appointments{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h3 class="text-center mb-4">Manage Appointments</h3>
+    <h3 class="text-center mb-4 text-primary fw-bold">
+        <i class="fas fa-calendar-check me-2"></i> Manage Appointments
+    </h3>
 
     <!-- Top Bar -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <input type="text" id="searchInput" class="form-control" placeholder="Search appointment...">
-       
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <input type="text" id="searchInput" class="form-control w-50 shadow-sm" placeholder="🔍 Search appointment...">
+
         {% if user.role == 'reception' %}
-        <a href="{% url 'schedule_appointment' %}" class="btn btn-primary">
+        <a href="{% url 'schedule_appointment' %}" class="btn btn-primary shadow-sm">
             <i class="fas fa-plus"></i> Add Appointment
         </a>
-        {% else %}
-    {% endif %}
-
+        {% endif %}
     </div>
-    
+
     <!-- Appointment Table -->
-    <div class="table-responsive">
+    <div class="table-responsive shadow-sm rounded">
         <table class="table table-striped table-hover align-middle" id="appointmentTable">
             <thead class="table-dark">
                 <tr>
-                    <th>#</th>
-                    <th>Patient</th>
-                    <th>Doctor</th>
-                    <th>Date & Time</th>
-                    <th>Status</th>
+                    <th onclick="sortTable(0)" class="sortable"># <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(1)" class="sortable">Patient <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)" class="sortable">Doctor <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(3)" class="sortable">Date & Time <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(4)" class="sortable">Status <i class="fas fa-sort"></i></th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -38,8 +35,8 @@
                 {% for appointment in appointments %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name }}</td>
-                    <td>{{ appointment.doctor.first_name }} {{ appointment.doctor.last_name }}</td>
+                    <td>{{ appointment.patient.user.first_name|title }} {{ appointment.patient.user.last_name|title }}</td>
+                    <td>{{ appointment.doctor.first_name|title }} {{ appointment.doctor.last_name|title }}</td>
                     <td>{{ appointment.date_time|date:"M d, Y - h:i A" }}</td>
                     <td>
                         {% if appointment.status == "scheduled" %}
@@ -51,14 +48,23 @@
                         {% endif %}
                     </td>
                     <td>
-                      {% if appointment.status == "scheduled" %}
-<form action="{% url 'cancel_appointment' appointment.id %}" method="post" class="d-inline"
-      onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
-</form>
-{% endif %}
+                        {% if appointment.status == "scheduled" %}
+                            <!-- Edit link -->
+                            <a href="{% url 'edit_appointment' appointment.id %}" class="btn btn-sm btn-outline-primary mb-1">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
 
+                            <!-- Cancel form -->
+                            <form action="{% url 'cancel_appointment' appointment.id %}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-times-circle"></i> Cancel
+                                </button>
+                            </form>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
@@ -71,50 +77,102 @@
     </div>
 
     <!-- Pagination Controls -->
-    <div class="d-flex justify-content-center mt-3">
-        <button id="prevPage" class="btn btn-secondary me-2">Previous</button>
-        <span id="pageInfo" class="align-self-center"></span>
-        <button id="nextPage" class="btn btn-secondary ms-2">Next</button>
+    <div class="d-flex justify-content-center align-items-center mt-4">
+        <button id="prevPage" class="btn btn-outline-secondary me-2">Previous</button>
+        <span id="pageInfo" class="fw-semibold"></span>
+        <button id="nextPage" class="btn btn-outline-secondary ms-2">Next</button>
     </div>
 </div>
 
-<!-- JavaScript for Search + Pagination -->
+<!-- JS: Search + Pagination + Sorting -->
 <script>
-    const rowsPerPage = 10; // Number of rows per page
-    let currentPage = 1;
+const rowsPerPage = 10;
+let currentPage = 1;
+const table = document.getElementById('appointmentTable');
+let rows = Array.from(table.querySelectorAll('tbody tr'));
 
-    const table = document.getElementById('appointmentTable');
-    const rows = table.querySelectorAll('tbody tr');
-    const totalPages = Math.ceil(rows.length / rowsPerPage);
+function showPage(page) {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
 
-    function showPage(page) {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        rows.forEach((row, index) => {
-            row.style.display = (index >= start && index < end) ? '' : 'none';
-        });
-        document.getElementById('pageInfo').textContent = `Page ${page} of ${totalPages}`;
-        document.getElementById('prevPage').disabled = page === 1;
-        document.getElementById('nextPage').disabled = page === totalPages;
-    }
+    // only show rows that are currently visible (after search filter)
+    const visibleRows = rows.filter(row => row.style.display !== 'none');
 
-    document.getElementById('prevPage').addEventListener('click', () => {
-        if (currentPage > 1) showPage(--currentPage);
-    });
-    document.getElementById('nextPage').addEventListener('click', () => {
-        if (currentPage < totalPages) showPage(++currentPage);
+    visibleRows.forEach((row, i) => {
+        row.style.display = (i >= start && i < end) ? '' : 'none';
     });
 
-    // Initial display
+    const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
+    document.getElementById('pageInfo').textContent = `Page ${page} of ${totalPages}`;
+    document.getElementById('prevPage').disabled = page === 1;
+    document.getElementById('nextPage').disabled = page === totalPages;
+}
+
+document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) currentPage--;
     showPage(currentPage);
+});
 
-    // 🔍 Live Search
-    document.getElementById('searchInput').addEventListener('keyup', function () {
-        const filter = this.value.toLowerCase();
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(filter) ? '' : 'none';
-        });
+document.getElementById('nextPage').addEventListener('click', () => {
+    const visibleRows = rows.filter(row => row.style.display !== 'none');
+    const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
+    if (currentPage < totalPages) currentPage++;
+    showPage(currentPage);
+});
+
+// Live Search
+document.getElementById('searchInput').addEventListener('keyup', function () {
+    const filter = this.value.toLowerCase();
+
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
     });
+
+    currentPage = 1;
+    showPage(currentPage);
+});
+
+// Column Sorting
+function sortTable(colIndex) {
+    const tbody = table.querySelector('tbody');
+    const rowsArray = Array.from(tbody.querySelectorAll('tr'));
+    const asc = table.getAttribute('data-sort-dir') !== 'asc';
+
+    rowsArray.sort((a, b) => {
+        const aText = a.children[colIndex].innerText.trim().toLowerCase();
+        const bText = b.children[colIndex].innerText.trim().toLowerCase();
+        return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+    });
+
+    tbody.innerHTML = '';
+    rowsArray.forEach(row => tbody.appendChild(row));
+    table.setAttribute('data-sort-dir', asc ? 'asc' : 'desc');
+
+    rows = Array.from(tbody.querySelectorAll('tr')); // update rows array
+    currentPage = 1;
+    showPage(currentPage);
+}
+
+function updateSortIcons(colIndex, asc) {
+    document.querySelectorAll('.sortable i').forEach(icon => icon.className = 'fas fa-sort');
+    const activeIcon = document.querySelectorAll('.sortable i')[colIndex];
+    activeIcon.className = asc ? 'fas fa-sort-up' : 'fas fa-sort-down';
+}
+
+// initialize
+showPage(currentPage);
 </script>
+
+</script>
+
+<style>
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+    }
+    .sortable:hover {
+        color: #0d6efd;
+    }
+</style>
 {% endblock %}

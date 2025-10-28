@@ -21,7 +21,9 @@
         <tr>
           <th>#</th>
           <th>Name</th>
+          <th>Instruction</th>
           <th>Quantity</th>
+          <th>Expiration Date</th>
           <th>Expiration Date</th>
         </tr>
       </thead>
@@ -30,6 +32,7 @@
         <tr>
           <td>{{ forloop.counter }}</td>
           <td class="med-name">{{ med.name }}</td>
+          <td class="med-ins">{{ med.instructions }}</td>
           <td>
             {% if med.stock_quantity > 0 %}
             <span class="badge bg-success">{{ med.stock_quantity }}</span>
@@ -47,7 +50,12 @@
               -
             {% endif %}
           </td>
-        </tr>
+<td>
+  <a href="{% url 'delete_medicine' med.id %}" class="btn btn-sm btn-danger" 
+     onclick="return confirm('Are you sure you want to delete {{ med.name }}?');">
+    <i class="fas fa-trash-alt"></i> Delete
+  </a>
+</td>        </tr>
         {% endfor %}
       </tbody>
     </table>

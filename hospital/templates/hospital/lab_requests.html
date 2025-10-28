@@ -5,7 +5,12 @@
 <div class="container mt-4">
     <h3 class="mb-4">Lab Requests</h3>
 
-    <table class="table table-striped table-bordered">
+    <!-- Search / Filter Input -->
+    <div class="mb-3">
+        <input type="text" id="filterInput" class="form-control" placeholder="🔍 Search by patient, doctor, test, or status...">
+    </div>
+
+    <table id="labRequestsTable" class="table table-striped table-bordered">
         <thead class="table-dark">
             <tr>
                 <th>Appointment</th>
@@ -45,6 +50,8 @@
                         <a href="{% url 'fill_lab_request' req.id %}" class="btn btn-sm btn-warning">Fill Test</a>
                     {% elif req.status == 'completed' %}
                         <a href="{% url 'view_lab_request' req.id %}" class="btn btn-sm btn-info">View / Update</a>
+                    {% else %}
+                        <a href="{% url 'view_lab_request' req.id %}" class="btn btn-sm btn-secondary">View</a>
                     {% endif %}
                 </td>
             </tr>
@@ -56,4 +63,26 @@
         </tbody>
     </table>
 </div>
+
+<!-- Filtering Script -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("filterInput");
+    const table = document.getElementById("labRequestsTable");
+    const rows = table.getElementsByTagName("tr");
+
+    input.addEventListener("keyup", function() {
+        const filter = this.value.toLowerCase();
+
+        // Loop through all table rows (skip header)
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const text = row.textContent.toLowerCase();
+
+            // Show/hide based on match
+            row.style.display = text.includes(filter) ? "" : "none";
+        }
+    });
+});
+</script>
 {% endblock %}

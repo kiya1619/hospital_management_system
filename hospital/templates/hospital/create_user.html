@@ -27,9 +27,10 @@
                     </div>
 
                     <!-- Username -->
-                    <div class="mb-3">
+                   <div class="col-md-6">
                         <label class="form-label">Username</label>
-                        <input type="text" class="form-control" name="username" placeholder="Enter username" required>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+                        <small id="usernameFeedback" class="form-text"></small>
                     </div>
 
                     <!-- Email -->
@@ -71,4 +72,34 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const usernameInput = document.getElementById("username");
+    const feedback = document.getElementById("usernameFeedback");
+
+    usernameInput.addEventListener("input", function() {
+        const username = usernameInput.value.trim();
+        if (username.length === 0) {
+            feedback.textContent = "";
+            return;
+        }
+
+        fetch(`/check-username/?username=${encodeURIComponent(username)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    feedback.textContent = "⚠️ Username already exists.";
+                    feedback.style.color = "red";
+                } else {
+                    feedback.textContent = "✅ Username is available.";
+                    feedback.style.color = "green";
+                }
+            })
+            .catch(error => {
+                console.error("Error checking username:", error);
+            });
+    });
+});
+</script>
 {% endblock %}

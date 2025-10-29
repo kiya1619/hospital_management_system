@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Edit Medicine{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 shadow-sm p-4 rounded bg-light">
+            <h3 class="mb-4 text-center text-primary fw-bold">
+                <i class="fas fa-edit me-2"></i> Edit Medicine
+            </h3>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" action="{% url 'edit_medicine' medicine.id %}">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-semibold">Medicine Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ medicine.name }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="dosage" class="form-label fw-semibold">Dosage</label>
+                    <input type="text" class="form-control" id="dosage" name="dosage" value="{{ medicine.dosage }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="instructions" class="form-label fw-semibold">Instructions</label>
+                    <textarea class="form-control" id="instructions" name="instructions" rows="3">{{ medicine.instructions }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="stock_quantity" class="form-label fw-semibold">Stock Quantity</label>
+                    <input type="number" min="0" class="form-control" id="stock_quantity" name="stock_quantity" value="{{ medicine.stock_quantity }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="expiry_date" class="form-label fw-semibold">Expiry Date</label>
+                    <input type="date" class="form-control" id="expiry_date" name="expiry_date" value="{{ medicine.expiry_date|date:'Y-m-d' }}" required>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'medicine_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Update Medicine
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

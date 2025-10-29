@@ -172,6 +172,7 @@ body {
                     <i class="fas fa-pills"></i> Medicine Management
                 </a>
                 <ul class="dropdown-menu">
+                      <a href="{% url 'pharmacist_dashboard' %}" class="nav-link">Dashboard</a>
                     <li><a class="dropdown-item" href="{% url 'add_medicine' %}">Add Medicine</a></li>
                     <li><a class="dropdown-item" href="{% url 'medicine_list' %}">View Medicines</a></li>
                 </ul>
@@ -184,7 +185,7 @@ body {
                 </a>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="{% url 'register_patients' %}">Register Patient</a></li>
-                    <li><a class="dropdown-item" href="{% url 'view_appointments' %}">View Appointments</a></li>
+                    <li><a class="dropdown-item" href="{% url 'patinet_list' %}">View Patients</a></li>
                     <li><a class="dropdown-item" href="{% url 'manage_appointments' %}">Manage Appointments</a></li>
                 </ul>
             </div>
@@ -195,6 +196,8 @@ body {
                     <i class="fas fa-bed"></i> Bed Management
                 </a>
                 <ul class="dropdown-menu">
+                <a href="{% url 'nurse_dashboard' %}" class="nav-link"> Dashboard</a>
+
                     <li><a class="dropdown-item" href="{% url 'add_bed' %}">Add Bed</a></li>
                     <li><a class="dropdown-item" href="{% url 'view_bedrooms' %}">View Bed Rooms</a></li>
                     <li><a class="dropdown-item" href="{% url 'view_bed_request' %}">View Bed Requests</a></li>

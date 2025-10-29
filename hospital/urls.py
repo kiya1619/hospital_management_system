@@ -23,12 +23,15 @@ urlpatterns = [
     path('edit_user/<uuid:user_id>', views.edit_user, name='edit_user'),
     path('edit_patient/<uuid:user_id>', views.edit_patient, name='edit_patient'),
     path('delete_medicine/<uuid:medicine_id>', views.delete_medicine, name='delete_medicine'),
+    path('edit_medicine/<uuid:medicine_id>', views.edit_medicine, name='edit_medicine'),
+    path('delete_patient/<uuid:patient_id>', views.delete_patient, name='delete_patient'),
 
     path('accounts/login/', views.login_view, name='login'),
 
     path('check-username/', views.check_username, name='check_username'),
 
     path('add_medicine/', views.add_medicine, name='add_medicine'),
+    path('about/', views.about, name='about'),
     path('view_prescription/<uuid:appointment_id>', views.view_prescription, name='view_prescription'),
     path('request_lab_test/<uuid:appointment_id>/', views.request_lab_test, name='request_lab_test'),
     path('lab_requests/', views.lab_requests, name='lab_requests'),

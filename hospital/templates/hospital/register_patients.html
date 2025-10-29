@@ -10,11 +10,7 @@
                 <h4>Register New Patient</h4>
             </div>
             <div class="card-body">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
+              
 
                 <form method="POST">
                     {% csrf_token %}

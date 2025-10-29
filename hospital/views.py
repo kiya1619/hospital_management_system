@@ -539,14 +539,14 @@ def fill_lab_request(request, request_id):
         return redirect('lab_requests')
 
     return render(request, 'hospital/fill_lab_request.html', {'lab_request': lab_request})
-@role_required('labtech', 'admin')
+
 @login_required
-@role_required('labtech', 'admin')
+@role_required('labtech', 'admin', 'doctor')
 def view_lab_request(request, request_id):
     lab_request = get_object_or_404(LabRequest, id=request_id)
 
     # Allow all lab technicians and admins
-    if request.user.role not in ['labtech', 'admin']:
+    if request.user.role not in ['labtech', 'admin', 'doctor']:
         messages.error(request, "You are not authorized to view this lab request.")
         return redirect('lab_requests')
 
@@ -898,3 +898,31 @@ def edit_appointment(request, appointment_id):
         'patients': patients,
         'doctors': doctors
     })
+
+
+def about(request):
+    return render(request, 'hospital/about.html')
+
+def edit_medicine(request, medicine_id):
+    medicine = get_object_or_404(Medicine, id=medicine_id)
+
+    if request.method == "POST":
+        medicine.name = request.POST.get('name')
+        medicine.dosage = request.POST.get('dosage')
+        medicine.instructions = request.POST.get('instructions')
+        medicine.stock_quantity = request.POST.get('stock_quantity')
+        expiry_date = request.POST.get('expiry_date')
+        medicine.expiry_date = expiry_date if expiry_date else None
+        medicine.save()
+        messages.success(request, f"Medicine '{medicine.name}' updated successfully.")
+        return redirect('medicine_list')
+
+    return render(request, 'hospital/edit_medicine.html', {'medicine': medicine})
+
+def delete_patient(request, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+    user = patient.user
+    patient.delete()
+    user.delete()
+    messages.success(request, f'Patient {user.get_full_name()} deleted successfully.')
+    return redirect('patinet_list')

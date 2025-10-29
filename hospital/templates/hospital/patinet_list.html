@@ -40,6 +40,10 @@
                     <td>{{ patient.address }}</td>
                     <td>
                         <a href="{% url 'edit_patient' patient.id %}" class="btn btn-sm btn-info">Edit</a>
+                        {% if user.role == 'admin' %}
+                        <a href="{% url 'delete_patient' patient.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                        {% endif %}
+
                     </td>
                    
                 </tr>

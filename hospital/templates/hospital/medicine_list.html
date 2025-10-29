@@ -4,18 +4,20 @@
 {% block content %}
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="text-primary"><i class="fas fa-pills me-2"></i>Medicine List</h3>
+    <h3 class="text-primary fw-bold">
+      <i class="fas fa-pills me-2"></i> Medicine List
+    </h3>
     <input
       type="text"
       id="searchInput"
-      class="form-control w-25"
-      placeholder="Search medicine..."
+      class="form-control w-25 shadow-sm"
+      placeholder="🔍 Search medicine..."
       onkeyup="filterTable()"
     />
   </div>
 
   {% if medicines %}
-  <div class="table-responsive shadow-sm">
+  <div class="table-responsive shadow-sm rounded">
     <table class="table table-striped align-middle" id="medicineTable">
       <thead class="table-primary">
         <tr>
@@ -24,15 +26,15 @@
           <th>Instruction</th>
           <th>Quantity</th>
           <th>Expiration Date</th>
-          <th>Expiration Date</th>
+          <th class="text-center">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for med in medicines %}
         <tr>
           <td>{{ forloop.counter }}</td>
-          <td class="med-name">{{ med.name }}</td>
-          <td class="med-ins">{{ med.instructions }}</td>
+          <td class="med-name fw-semibold">{{ med.name }}</td>
+          <td class="med-ins">{{ med.instructions|default:"—" }}</td>
           <td>
             {% if med.stock_quantity > 0 %}
             <span class="badge bg-success">{{ med.stock_quantity }}</span>
@@ -50,12 +52,22 @@
               -
             {% endif %}
           </td>
-<td>
-  <a href="{% url 'delete_medicine' med.id %}" class="btn btn-sm btn-danger" 
-     onclick="return confirm('Are you sure you want to delete {{ med.name }}?');">
-    <i class="fas fa-trash-alt"></i> Delete
-  </a>
-</td>        </tr>
+          <td class="text-center">
+            <div class="d-flex justify-content-center gap-2">
+              <!-- Edit -->
+              <a href="{% url 'edit_medicine' med.id %}" class="btn btn-sm btn-outline-primary" title="Edit Medicine">
+                <i class="fas fa-edit"></i> Edit
+              </a>
+
+              <!-- Delete -->
+              <a href="{% url 'delete_medicine' med.id %}" class="btn btn-sm btn-outline-danger"
+                 title="Delete Medicine"
+                 onclick="return confirm('Are you sure you want to delete {{ med.name }}?');">
+                <i class="fas fa-trash-alt"></i> Delete
+              </a>
+            </div>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
@@ -69,60 +81,62 @@
   </div>
 
   {% else %}
-  <div class="alert alert-info mt-3">
-    No medicines available in the system.
+  <div class="alert alert-info mt-3 shadow-sm">
+    <i class="fas fa-info-circle me-2"></i> No medicines available in the system.
   </div>
   {% endif %}
 </div>
 
 <!-- JavaScript for Search + Pagination -->
 <script>
-  const rowsPerPage = 10; // Number of rows per page
+  const rowsPerPage = 10;
   let currentPage = 1;
 
   function displayTablePage(page) {
     const table = document.getElementById("medicineTable");
-    const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+    const rows = table.querySelectorAll("tbody tr");
     const totalRows = rows.length;
     const totalPages = Math.ceil(totalRows / rowsPerPage);
     const pagination = document.getElementById("pagination");
 
-    // Hide all rows first
-    for (let i = 0; i < totalRows; i++) rows[i].style.display = "none";
+    rows.forEach((row, i) => {
+      row.style.display = (i >= (page - 1) * rowsPerPage && i < page * rowsPerPage) ? "" : "none";
+    });
 
-    // Calculate visible range
-    const start = (page - 1) * rowsPerPage;
-    const end = Math.min(start + rowsPerPage, totalRows);
-
-    for (let i = start; i < end; i++) rows[i].style.display = "";
-
-    // Update pagination buttons
     pagination.innerHTML = "";
     for (let i = 1; i <= totalPages; i++) {
       pagination.innerHTML += `
         <li class="page-item ${i === page ? 'active' : ''}">
-          <a class="page-link" href="#" onclick="displayTablePage(${i})">${i}</a>
+          <a class="page-link" href="#" onclick="displayTablePage(${i}); return false;">${i}</a>
         </li>`;
     }
-
     currentPage = page;
   }
 
   function filterTable() {
     const input = document.getElementById("searchInput").value.toLowerCase();
-    const table = document.getElementById("medicineTable");
-    const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+    const rows = document.querySelectorAll("#medicineTable tbody tr");
 
-    for (let i = 0; i < rows.length; i++) {
-      const nameCell = rows[i].getElementsByClassName("med-name")[0];
-      if (nameCell) {
-        const text = nameCell.textContent.toLowerCase();
-        rows[i].style.display = text.includes(input) ? "" : "none";
-      }
-    }
+    rows.forEach(row => {
+      const name = row.querySelector(".med-name").textContent.toLowerCase();
+      row.style.display = name.includes(input) ? "" : "none";
+    });
   }
 
-  // Initialize pagination on page load
   document.addEventListener("DOMContentLoaded", () => displayTablePage(currentPage));
 </script>
+
+<style>
+  table th, table td {
+    vertical-align: middle;
+  }
+  .btn-outline-primary i,
+  .btn-outline-danger i {
+    margin-right: 5px;
+  }
+  .table-primary th {
+    background-color: #007bff !important;
+    color: #fff;
+  }
+</style>
 {% endblock %}

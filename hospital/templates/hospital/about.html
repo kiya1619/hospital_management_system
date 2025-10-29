@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About CareNet Hospital</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .hero {
+            background: linear-gradient(135deg, #1a6bb3 0%, #0d4d8c 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        .team img {
+            width: 100%;
+            height: auto;
+        }
+        .team-card {
+            transition: transform 0.3s;
+        }
+        .team-card:hover {
+            transform: translateY(-5px);
+        }
+        .cta {
+            background: #1a6bb3;
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .cta a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero Section -->
+<section class="hero">
+    <h1>About CareNet Hospital</h1>
+    <p>Providing compassionate care and advanced healthcare solutions to our community.</p>
+    <a href="{% url 'home' %}" class="btn btn-light btn-lg mt-3"><i class="fas fa-home me-2"></i> Back to Home</a>
+</section>
+
+<!-- Mission & Vision -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-title">
+            <h2>Our Mission & Vision</h2>
+            <p class="text-muted">Dedicated to excellence in healthcare and patient-centered services.</p>
+        </div>
+        <div class="row text-center">
+            <div class="col-md-6 mb-4">
+                <div class="p-4 shadow-sm rounded bg-light h-100">
+                    <i class="fas fa-bullseye text-primary card-icon"></i>
+                    <h4 class="fw-bold">Our Mission</h4>
+                    <p>To provide accessible, high-quality medical care with compassion and professionalism, improving the health and well-being of every patient we serve.</p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="p-4 shadow-sm rounded bg-light h-100">
+                    <i class="fas fa-eye text-primary card-icon"></i>
+                    <h4 class="fw-bold">Our Vision</h4>
+                    <p>To be recognized as a leading healthcare provider, combining state-of-the-art technology with personalized care for a healthier community.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Values -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="section-title">
+            <h2>Our Core Values</h2>
+        </div>
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="p-3 shadow-sm rounded bg-white h-100">
+                    <i class="fas fa-heart text-danger card-icon"></i>
+                    <h5 class="fw-bold">Compassion</h5>
+                    <p>We treat every patient with empathy and understanding.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="p-3 shadow-sm rounded bg-white h-100">
+                    <i class="fas fa-user-shield text-primary card-icon"></i>
+                    <h5 class="fw-bold">Integrity</h5>
+                    <p>We uphold honesty, ethics, and transparency in all we do.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="p-3 shadow-sm rounded bg-white h-100">
+                    <i class="fas fa-stethoscope text-success card-icon"></i>
+                    <h5 class="fw-bold">Excellence</h5>
+                    <p>We strive for the highest quality in healthcare services.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="p-3 shadow-sm rounded bg-white h-100">
+                    <i class="fas fa-users text-warning card-icon"></i>
+                    <h5 class="fw-bold">Collaboration</h5>
+                    <p>We work as a team to provide the best outcomes for patients.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-title">
+            <h2>Meet Our Team</h2>
+            <p class="text-muted">A group of skilled professionals dedicated to your health.</p>
+        </div>
+        <div class="row text-center team">
+            <div class="col-md-3 mb-4">
+                <div class="card team-card shadow-sm h-100">
+                    <img src="https://via.placeholder.com/300x300" alt="Dr. Jane Smith">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Dr. Jane Smith</h5>
+                        <p class="card-text text-muted">Chief Medical Officer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card team-card shadow-sm h-100">
+                    <img src="https://via.placeholder.com/300x300" alt="Dr. John Doe">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Dr. John Doe</h5>
+                        <p class="card-text text-muted">Head of Surgery</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card team-card shadow-sm h-100">
+                    <img src="https://via.placeholder.com/300x300" alt="Nurse Alice">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Alice Brown</h5>
+                        <p class="card-text text-muted">Head Nurse</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card team-card shadow-sm h-100">
+                    <img src="https://via.placeholder.com/300x300" alt="Dr. Emily">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Dr. Emily Clark</h5>
+                        <p class="card-text text-muted">Pediatrics Specialist</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta">
+    <div class="container">
+        <h3 class="fw-bold mb-3">Your Health is Our Priority</h3>
+        <p class="mb-4">Contact us today to schedule an appointment or learn more about our services.</p>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#contactModal">
+            <i class="fas fa-phone-alt me-2"></i> Contact Us
+        </button>
+    </div>
+</section>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="contactModalLabel"><i class="fas fa-address-book me-2"></i>Contact Information</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Phone:</strong> +251 977 062 008 / +251 799 166 964</p>
+        <p><strong>Email:</strong> <a href="mailto:abdisaworkmail@gmail.com">abdisaworkmail@gmail.com</a></p>
+        <p><strong>Address:</strong> Addis Ababa, Yeka Abado</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -65,7 +65,7 @@
                                 {% if lab_request %}
                                     {% if lab_request.status == 'completed' %}
                                         <li>
-                                            <a class="dropdown-item" href="{% url 'view_lab_test' lab_request.id %}">View Lab Test</a>
+                                            <a class="dropdown-item" href="{% url 'view_lab_request' lab_request.id %}">View Lab Test</a>
                                         </li>
                                     {% else %}
                                         <li>

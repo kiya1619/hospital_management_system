@@ -168,3 +168,15 @@ class BedAssignment(models.Model):
     assigned_by = models.ForeignKey(User, limit_choices_to={'role':'nurse'}, on_delete=models.CASCADE)
     date_assigned = models.DateTimeField(auto_now_add=True)
     date_released = models.DateTimeField(null=True, blank=True)
+
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"

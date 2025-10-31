@@ -99,8 +99,6 @@ DATABASES = {
     }
 }
 
-
-# ALLOWED_HOSTS = []
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -111,6 +109,18 @@ DATABASES = {
 #         'PORT': '5432',               # Default PostgreSQL port
 #     }
 # }
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'abdisaworkmail@gmail.com'
+EMAIL_HOST_PASSWORD = 'rdxalhwcbsodugmv'   # App password, not normal password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+ALLOWED_HOSTS = []
+
+
+
+
 
 
 # Password validation

@@ -25,18 +25,19 @@
                 {% for req in bed_requests %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ req.appointment.patient.user.get_full_name | title }}</td>
+                    <td>{{ req.appointment.patient.user.get_full_name|title }}</td>
                     <td>{{ req.requested_by.get_full_name }}</td>
                     <td>
                         {% if req.status == "pending" %}
                             <a href="{% url 'assign_bed' req.id %}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-bed me-1"></i> Assign Bed
                             </a>
-                        {% elif req.status == "fulfilled" and req.assignment.first %}
+                        {% elif req.status == "fulfilled" and req.assignment.first and req.assignment.first.bed %}
+                            {% comment %} Only show if there is a real assignment and the bed exists {% endcomment %}
                             <button class="btn btn-sm btn-outline-info viewBtn"
                                     data-bs-toggle="modal"
                                     data-bs-target="#viewBedModal"
-                                    data-patient="{{ req.appointment.patient.user.get_full_name | title }}"
+                                    data-patient="{{ req.appointment.patient.user.get_full_name|title }}"
                                     data-doctor="{{ req.requested_by.get_full_name }}"
                                     data-ward="{{ req.assignment.first.bed.ward }}"
                                     data-bed="{{ req.assignment.first.bed.bed_number }}"
@@ -154,18 +155,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
             // Show bed status
             const bedStatus = btn.dataset.status;
+            const assignmentId = btn.dataset.assignment;
+
             document.getElementById("modalStatus").textContent = bedStatus.charAt(0).toUpperCase() + bedStatus.slice(1);
 
-            // Only show Release button if bed is occupied
-            if(bedStatus === "occupied") {
+            // Only show Release button if assignment exists AND bed is occupied
+            if(assignmentId && bedStatus === "occupied") {
                 releaseBtn.style.display = "inline-block";
+                releaseForm.action = `/release-bedd/${assignmentId}/`;
             } else {
                 releaseBtn.style.display = "none";
+                releaseForm.action = "#";
             }
-
-            // Set form action dynamically with assignment id
-            const assignmentId = btn.dataset.assignment;
-            releaseForm.action = `/release-bed/${assignmentId}/`;
         });
     });
 });

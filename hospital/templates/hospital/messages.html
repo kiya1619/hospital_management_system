@@ -1,0 +1,885 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Contact Messages</h1>
+        <p>Manage and respond to customer inquiries</p>
+    </div>
+
+    <!-- Search and Stats Section -->
+    <div class="dashboard-controls">
+        <div class="search-container">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search messages by name, email, or subject..." class="search-input">
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <span class="stat-number">{{ messagess|length }}</span>
+                <span class="stat-label">Total Messages</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ today_messages|default:"0" }}</span>
+                <span class="stat-label">Today</span>
+            </div>
+        </div>
+    </div>
+
+    {% if messagess %}
+        <!-- Messages Table -->
+        <div class="table-container">
+            <table id="messagesTable" class="messages-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="name">Name</th>
+                        <th class="sortable" data-sort="email">Email</th>
+                        <th>Phone</th>
+                        <th class="sortable" data-sort="subject">Subject</th>
+                        <th>Message</th>
+                        <th class="sortable" data-sort="date">Received</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in messagess %}
+                    <tr class="message-row {% if forloop.counter <= 3 %}new-message{% endif %}">
+                        <td class="sender-info">
+                            <div class="sender-avatar">
+                                {{ m.name|slice:":1"|upper }}
+                            </div>
+                            <div class="sender-details">
+                                <span class="sender-name">{{ m.name }}</span>
+                            </div>
+                        </td>
+                        <td class="email-cell">{{ m.email }}</td>
+                        <td class="phone-cell">{{ m.phone|default:"-" }}</td>
+                        <td class="subject-cell">{{ m.subject }}</td>
+                        <td class="message-preview">{{ m.message|truncatechars:60 }}</td>
+                        <td class="date-cell">
+                            <span class="date">{{ m.created_at|date:"M j" }}</span>
+                            <span class="time">{{ m.created_at|date:"H:i" }}</span>
+                        </td>
+                        <td class="actions-cell">
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn" 
+                                        data-id="{{ m.id }}"
+                                        data-name="{{ m.name|escape }}"
+                                        data-email="{{ m.email|escape }}"
+                                        data-phone="{{ m.phone|default:"-"|escape }}"
+                                        data-subject="{{ m.subject|escape }}"
+                                        data-message="{{ m.message|escape }}"
+                                        data-date="{{ m.created_at|date:'M j, Y H:i' }}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    View
+                                </button>
+                                <a class="action-btn reply-btn" 
+                                   href="mailto:{{ m.email }}?subject=Re: {{ m.subject|urlencode }}&body=Hello {{ m.name|urlencode }},%0D%0A%0D%0A">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Reply
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <div id="pagination" class="pagination"></div>
+            <div class="rows-info">
+                Showing <span id="rowsShowing">1-5</span> of {{ messagess|length }} messages
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h3>No messages yet</h3>
+            <p>Customer messages will appear here once they contact you through your contact form.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalSubject"></h2>
+            <span id="closeModal" class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="message-meta">
+                <div class="meta-item">
+                    <span class="meta-label">From:</span>
+                    <span id="modalName" class="meta-value"></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Email:</span>
+                    <span id="modalEmail" class="meta-value"></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Phone:</span>
+                    <span id="modalPhone" class="meta-value"></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Date:</span>
+                    <span id="modalDate" class="meta-value"></span>
+                </div>
+            </div>
+            <div class="message-content">
+                <h3>Message</h3>
+                <p id="modalMessage" class="message-text"></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a id="modalReplyBtn" class="btn-primary" href="#">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Reply
+            </a>
+            <button id="modalCloseBtn" class="btn-secondary">Close</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #0b78d1;
+        --primary-light: #e8f2fc;
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --border-color: #e0e0e0;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --radius: 8px;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 32px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 8px;
+    }
+
+    .dashboard-header p {
+        color: var(--secondary-color);
+        font-size: 16px;
+    }
+
+    .dashboard-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .search-container {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--secondary-color);
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        font-size: 15px;
+        transition: all 0.2s;
+        background-color: white;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(11, 120, 209, 0.1);
+    }
+
+    .stats-container {
+        display: flex;
+        gap: 16px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 16px 20px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        text-align: center;
+        min-width: 100px;
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: var(--secondary-color);
+    }
+
+    .table-container {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .messages-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .messages-table th {
+        background-color: #f8f9fa;
+        padding: 16px 12px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--dark-color);
+        border-bottom: 1px solid var(--border-color);
+        font-size: 14px;
+        user-select: none;
+    }
+
+    .messages-table td {
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 14px;
+    }
+
+    .messages-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .messages-table tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .messages-table tr.new-message {
+        background-color: var(--primary-light);
+    }
+
+    .sortable {
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s;
+    }
+
+    .sortable:hover {
+        color: var(--primary-color);
+    }
+
+    .sortable::after {
+        content: "↕";
+        margin-left: 4px;
+        font-size: 12px;
+        opacity: 0.5;
+    }
+
+    .sender-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .sender-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .sender-name {
+        font-weight: 500;
+    }
+
+    .email-cell, .phone-cell {
+        color: var(--secondary-color);
+    }
+
+    .subject-cell {
+        font-weight: 500;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .message-preview {
+        color: var(--secondary-color);
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .date-cell {
+        text-align: center;
+    }
+
+    .date {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .time {
+        display: block;
+        font-size: 12px;
+        color: var(--secondary-color);
+    }
+
+    .actions-cell {
+        width: 160px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        text-decoration: none;
+    }
+
+    .view-btn {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+
+    .view-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .reply-btn {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .reply-btn:hover {
+        background-color: #2e7d32;
+        color: white;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 8px;
+    }
+
+    .pagination button {
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+
+    .pagination button:hover {
+        background-color: #f1f1f1;
+    }
+
+    .pagination button.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .rows-info {
+        color: var(--secondary-color);
+        font-size: 14px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+
+    .empty-icon {
+        color: #d1d5db;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        margin-bottom: 12px;
+        color: var(--dark-color);
+    }
+
+    .empty-state p {
+        color: var(--secondary-color);
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: var(--radius);
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 24px 24px 0;
+        margin-bottom: 16px;
+    }
+
+    .modal-header h2 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-right: 20px;
+    }
+
+    .close-modal {
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--secondary-color);
+        transition: color 0.2s;
+    }
+
+    .close-modal:hover {
+        color: var(--dark-color);
+    }
+
+    .modal-body {
+        padding: 0 24px;
+    }
+
+    .message-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .meta-label {
+        font-size: 13px;
+        color: var(--secondary-color);
+        margin-bottom: 4px;
+    }
+
+    .meta-value {
+        font-weight: 500;
+    }
+
+    .message-content h3 {
+        font-size: 16px;
+        margin-bottom: 12px;
+        color: var(--dark-color);
+    }
+
+    .message-text {
+        white-space: pre-wrap;
+        line-height: 1.6;
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 6px;
+        font-size: 15px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 20px 24px 24px;
+        border-top: 1px solid var(--border-color);
+        margin-top: 20px;
+    }
+
+    .btn-primary, .btn-secondary {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+        border: none;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0964b3;
+    }
+
+    .btn-secondary {
+        background-color: #f1f1f1;
+        color: var(--dark-color);
+    }
+
+    .btn-secondary:hover {
+        background-color: #e0e0e0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .dashboard-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .search-container {
+            max-width: 100%;
+        }
+        
+        .stats-container {
+            justify-content: space-between;
+        }
+        
+        .message-meta {
+            grid-template-columns: 1fr;
+        }
+        
+        .pagination-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .pagination {
+            justify-content: center;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .messages-table {
+            min-width: 800px;
+        }
+    }
+</style>
+
+<script>
+    // === Pagination and Search ===
+    const rowsPerPage = 5;
+    const table = document.getElementById("messagesTable");
+    const tbody = table ? table.querySelector("tbody") : null;
+    const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
+    const pagination = document.getElementById("pagination");
+    const searchInput = document.getElementById("searchInput");
+    const rowsShowing = document.getElementById("rowsShowing");
+
+    let currentPage = 1;
+    let currentSort = { column: 'date', direction: 'desc' };
+
+    function displayPage(page) {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        rows.forEach((row, i) => {
+            row.style.display = (i >= start && i < end) ? "" : "none";
+        });
+        renderPagination(page);
+        updateRowsShowing(start, end);
+    }
+
+    function renderPagination(currentPage) {
+        const pageCount = Math.ceil(rows.length / rowsPerPage);
+        pagination.innerHTML = "";
+        
+        // Previous button
+        if (currentPage > 1) {
+            const prevBtn = document.createElement("button");
+            prevBtn.innerHTML = "&laquo;";
+            prevBtn.addEventListener("click", () => displayPage(currentPage - 1));
+            pagination.appendChild(prevBtn);
+        }
+        
+        for (let i = 1; i <= pageCount; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i;
+            btn.classList.toggle("active", i === currentPage);
+            btn.addEventListener("click", () => displayPage(i));
+            pagination.appendChild(btn);
+        }
+        
+        // Next button
+        if (currentPage < pageCount) {
+            const nextBtn = document.createElement("button");
+            nextBtn.innerHTML = "&raquo;";
+            nextBtn.addEventListener("click", () => displayPage(currentPage + 1));
+            pagination.appendChild(nextBtn);
+        }
+    }
+
+    function updateRowsShowing(start, end) {
+        const total = rows.length;
+        const showingStart = Math.min(start + 1, total);
+        const showingEnd = Math.min(end, total);
+        rowsShowing.textContent = `${showingStart}-${showingEnd}`;
+    }
+
+    function filterRows() {
+        const query = searchInput.value.toLowerCase();
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(query) ? "" : "none";
+        });
+        
+        const visibleRows = rows.filter(r => r.style.display !== "none");
+        rows.forEach(r => r.style.display = "none");
+        
+        const start = 0;
+        const end = Math.min(rowsPerPage, visibleRows.length);
+        visibleRows.slice(start, end).forEach(r => r.style.display = "");
+        
+        renderPaginationFiltered(visibleRows);
+        updateRowsShowing(start, end);
+    }
+
+    function renderPaginationFiltered(visibleRows) {
+        const pageCount = Math.ceil(visibleRows.length / rowsPerPage);
+        pagination.innerHTML = "";
+        
+        for (let i = 1; i <= pageCount; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i;
+            btn.classList.toggle("active", i === 1);
+            btn.addEventListener("click", () => {
+                rows.forEach(r => r.style.display = "none");
+                const start = (i-1)*rowsPerPage;
+                const end = i*rowsPerPage;
+                visibleRows.slice(start, end).forEach(r => r.style.display = "");
+                updateRowsShowing(start, end);
+            });
+            pagination.appendChild(btn);
+        }
+    }
+
+    function sortTable(column, direction) {
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        
+        rows.sort((a, b) => {
+            let aValue, bValue;
+            
+            if (column === 'name') {
+                aValue = a.querySelector('.sender-name').textContent.toLowerCase();
+                bValue = b.querySelector('.sender-name').textContent.toLowerCase();
+            } else if (column === 'email') {
+                aValue = a.querySelector('.email-cell').textContent.toLowerCase();
+                bValue = b.querySelector('.email-cell').textContent.toLowerCase();
+            } else if (column === 'subject') {
+                aValue = a.querySelector('.subject-cell').textContent.toLowerCase();
+                bValue = b.querySelector('.subject-cell').textContent.toLowerCase();
+            } else if (column === 'date') {
+                aValue = a.querySelector('.date-cell .date').textContent + ' ' + a.querySelector('.date-cell .time').textContent;
+                bValue = b.querySelector('.date-cell .date').textContent + ' ' + b.querySelector('.date-cell .time').textContent;
+            }
+            
+            if (direction === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+        
+        // Remove existing rows
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
+        
+        // Add sorted rows
+        rows.forEach(row => tbody.appendChild(row));
+        
+        // Update the rows array
+        rows.length = 0;
+        rows.push(...Array.from(tbody.querySelectorAll("tr")));
+        
+        // Display first page
+        displayPage(1);
+    }
+
+    // Event listeners
+    if (searchInput) {
+        searchInput.addEventListener("input", filterRows);
+    }
+    
+    // Sortable headers
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.dataset.sort;
+            let direction = 'asc';
+            
+            if (currentSort.column === column) {
+                direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            }
+            
+            currentSort = { column, direction };
+            sortTable(column, direction);
+        });
+    });
+
+    if (rows.length > 0) {
+        displayPage(1);
+    }
+
+    // === Modal ===
+    const modal = document.getElementById("modal");
+    const closeModal = document.getElementById("closeModal");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+    const modalName = document.getElementById("modalName");
+    const modalEmail = document.getElementById("modalEmail");
+    const modalPhone = document.getElementById("modalPhone");
+    const modalSubject = document.getElementById("modalSubject");
+    const modalMessage = document.getElementById("modalMessage");
+    const modalDate = document.getElementById("modalDate");
+    const modalReplyBtn = document.getElementById("modalReplyBtn");
+
+    document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            modalName.textContent = btn.dataset.name;
+            modalEmail.textContent = btn.dataset.email;
+            modalPhone.textContent = btn.dataset.phone;
+            modalSubject.textContent = btn.dataset.subject;
+            modalMessage.textContent = btn.dataset.message;
+            modalDate.textContent = btn.dataset.date;
+            
+            // Set reply link
+            modalReplyBtn.href = `mailto:${btn.dataset.email}?subject=Re: ${encodeURIComponent(btn.dataset.subject)}&body=Hello ${encodeURIComponent(btn.dataset.name)},%0D%0A%0D%0A`;
+            
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+        });
+    });
+
+    function closeModalFunc() {
+        modal.style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    closeModal.addEventListener("click", closeModalFunc);
+    modalCloseBtn.addEventListener("click", closeModalFunc);
+
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) closeModalFunc();
+    });
+</script>
+{% endblock %}

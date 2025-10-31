@@ -26,16 +26,19 @@
             <p><strong>Phone:</strong> {{ selected_patient.phone }}</p>
             <p><strong>Address:</strong> {{ selected_patient.address }}</p>
 
+            <!-- Appointments -->
+            {% if appointments %}
             <hr>
             <h5>🗓️ Appointments</h5>
             <ul>
                 {% for a in appointments %}
                     <li>{{ a.date_time|date:"Y-m-d H:i" }} - Dr. {{ a.doctor.get_full_name|title }} ({{ a.status|capfirst }})</li>
-                {% empty %}
-                    <li>No appointments found.</li>
                 {% endfor %}
             </ul>
+            {% endif %}
 
+            <!-- Prescriptions -->
+            {% if prescriptions %}
             <hr>
             <h5>💊 Prescriptions</h5>
             <ul>
@@ -43,43 +46,44 @@
                     <li>
                         <strong>Date:</strong> {{ p.date_created|date:"Y-m-d" }} <br>
                         <strong>Doctor:</strong> Dr. {{ p.doctor.get_full_name|title }}<br>
-                        {% for pm in p.prescriptionmedicine_set.all %}
-                            - {{ pm.medicine.name }} (x{{ pm.quantity }})<br>
-                        {% endfor %}
+                        {% if p.prescriptionmedicine_set.all %}
+                            {% for pm in p.prescriptionmedicine_set.all %}
+                                - {{ pm.medicine.name }} (x{{ pm.quantity }})<br>
+                            {% endfor %}
+                        {% endif %}
                         {% if not p.prescriptionmedicine_set.all %}
                             <em>No medicines listed.</em>
                         {% endif %}
                     </li>
-                {% empty %}
-                    <li>No prescriptions found.</li>
                 {% endfor %}
             </ul>
+            {% endif %}
 
+            <!-- Lab Requests -->
+            {% if lab_requests %}
             <hr>
             <h5>🧪 Lab Requests</h5>
-<ul class="list-group">
-    {% for lab in lab_requests %}
-        <li class="list-group-item">
-            <p><strong>Status:</strong> {{ lab.status|capfirst }}</p>
-            <p><strong>Tests:</strong> {{ lab.tests|join:", " }}</p>
+            <ul class="list-group">
+                {% for lab in lab_requests %}
+                    <li class="list-group-item">
+                        <p><strong>Status:</strong> {{ lab.status|capfirst }}</p>
+                        <p><strong>Tests:</strong> {{ lab.tests|join:", " }}</p>
 
-            {% if lab.results %}
-                <p><strong>Results:</strong></p>
-                <ul class="mb-2">
-                    {% for test_name, result_text in lab.results.items %}
-                        <li><b>{{ test_name|title }}</b>: {{ result_text }}</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-muted">No results recorded yet.</p>
+                        {% if lab.results %}
+                            <p><strong>Results:</strong></p>
+                            <ul class="mb-2">
+                                {% for test_name, result_text in lab.results.items %}
+                                    <li><b>{{ test_name|title }}</b>: {{ result_text }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
             {% endif %}
-        </li>
-    {% empty %}
-        <li class="list-group-item text-muted">No lab requests found.</li>
-    {% endfor %}
-</ul>
 
-
+            <!-- Bed Assignments -->
+            {% if bed_assignments %}
             <hr>
             <h5>🛏️ Bed Assignments</h5>
             <ul>
@@ -90,10 +94,9 @@
                         <strong>Assigned By:</strong> Nurse {{ b.assigned_by.get_full_name|title }} <br>
                         <strong>Date Assigned:</strong> {{ b.date_assigned|date:"Y-m-d H:i" }}
                     </li>
-                {% empty %}
-                    <li>No bed assignments found.</li>
                 {% endfor %}
             </ul>
+            {% endif %}
         </div>
     {% endif %}
 </div>

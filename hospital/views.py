@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from hospital.models import User, Patient, Appointment, Medicine, Bed,LabResultImage, Prescription,BedRequest, PrescriptionMedicine, LabRequest, BedAssignment, Bed
+from hospital.models import User, Patient, Appointment, Medicine, ContactMessage, Bed,LabResultImage, Prescription,BedRequest, PrescriptionMedicine, LabRequest, BedAssignment, Bed
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from .decorators import role_required
@@ -12,6 +12,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.crypto import get_random_string
 from django.db import IntegrityError
+from django.core.mail import send_mail
+import json
+
 def check_username(request):
     username = request.GET.get('username', '').strip()
     exists = User.objects.filter(username__iexact=username).exists()
@@ -780,14 +783,14 @@ def patient_list_view(request):
 @ login_required
 @role_required('nurse','admin')
 def release_bed(request, bed_id):
-    assignment = get_object_or_404(BedAssignment, id=bed_id)
     if request.method == "POST":
-        assignment.date_released = timezone.now()
-        assignment.bed.status = 'available'
-        assignment.bed.save()
-        assignment.save()
-        messages.success(request, f"Bed {assignment.bed.bed_number} has been released.")
-    return redirect('patient_list_nurse_view')
+        bed = get_object_or_404(Bed, id=bed_id)
+        if bed.status != 'occupied':
+            return JsonResponse({"success": False, "error": "Bed is not occupied."}, status=400)
+        bed.status = 'available'
+        bed.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
 
 @login_required
 @role_required('doctor', 'admin')
@@ -802,6 +805,26 @@ def medical_report(request, appointment_id):
         'appointment': appointment
     })
 
+def release_bed_view(request, assignment_id):
+    """
+    Releases a bed assigned to a patient.
+    """
+    assignment = get_object_or_404(BedAssignment, id=assignment_id)
+    bed = assignment.bed
+
+    # Only release if the bed is currently occupied
+    if bed.status == "occupied":
+        bed.status = "available"
+        bed.save()
+
+        assignment.date_released = timezone.now()
+        assignment.save()
+
+        messages.success(request, f"Bed {bed.bed_number} in {bed.ward} has been released.")
+    else:
+        messages.warning(request, f"Bed {bed.bed_number} is not currently occupied.")
+
+    return redirect('patient_list_view')
 @login_required
 def expired_medicine_report(request):
     today = timezone.now().date()
@@ -926,3 +949,49 @@ def delete_patient(request, patient_id):
     user.delete()
     messages.success(request, f'Patient {user.get_full_name()} deleted successfully.')
     return redirect('patinet_list')
+from django.conf import settings
+
+def contact_view(request):
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        email = request.POST.get("email", "").strip()
+        phone = request.POST.get("phone", "").strip()
+        subject = request.POST.get("subject", "").strip()
+        message = request.POST.get("message", "").strip()
+
+        if not name or not email or not message:
+            return render(request, "hospital/contact.html", {"error": "Name, email, and message are required."})
+
+        ContactMessage.objects.create(
+            name=name,
+            email=email,
+            phone=phone or None,
+            subject=subject,
+            message=message
+        )
+
+        try:
+            send_mail(
+                subject=f"New Contact Message: {subject or 'No Subject'}",
+                message=f"From: {name}\nEmail: {email}\nPhone: {phone}\n\n{message}",
+                from_email=email,
+                recipient_list=[settings.EMAIL_HOST_USER],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print("Email sending failed:", e)
+
+        # Redirect with success parameter
+        return redirect('/contact/?success=true')  # <- include ?success=true
+
+    return render(request, "hospital/contact.html")
+@role_required('admin')
+def message_list(request):
+    # Admin view to list all contact messages
+    messagess = ContactMessage.objects.all().order_by('-created_at')
+    return render(request, 'hospital/messages.html', {'messagess': messagess})
+
+def contact_success(request):
+    # Display a success page after the contact form submission
+    messages = ContactMessage.objects.all().order_by('-created_at')
+    return render(request, 'hospital/contact_success.html', {'messages': messages})

@@ -29,9 +29,12 @@ urlpatterns = [
     path('accounts/login/', views.login_view, name='login'),
 
     path('check-username/', views.check_username, name='check_username'),
+    path('messages/', views.message_list, name='message_list'),
+    path('contact_success/', views.contact_success, name='contact_success'),
 
     path('add_medicine/', views.add_medicine, name='add_medicine'),
     path('about/', views.about, name='about'),
+    path('contact/', views.contact_view, name='contact'),
     path('view_prescription/<uuid:appointment_id>', views.view_prescription, name='view_prescription'),
     path('request_lab_test/<uuid:appointment_id>/', views.request_lab_test, name='request_lab_test'),
     path('lab_requests/', views.lab_requests, name='lab_requests'),
@@ -52,6 +55,8 @@ urlpatterns = [
     path('edit_appointment/<uuid:appointment_id>/', views.edit_appointment, name='edit_appointment'),
     path('patient_list_view/', views.patient_list_view, name='patient_list_view'),
     path('release-bed/<uuid:bed_id>/', views.release_bed, name='release_bed'),
+    path('release-bedd/<uuid:assignment_id>/', views.release_bed_view, name='release_bed_by_assignment'),
+    
     path('medical-report/<uuid:appointment_id>/', views.medical_report, name='medical_report'),
     path('expired_medicine_report/', views.expired_medicine_report, name='expired_medicine_report'),
 

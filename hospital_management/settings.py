@@ -84,8 +84,6 @@ WSGI_APPLICATION = 'hospital_management.wsgi.application'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 ALLOWED_HOSTS = ['abdisa16.pythonanywhere.com']
 DATABASES = {
@@ -99,6 +97,18 @@ DATABASES = {
     }
 }
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'abdisaworkmail@gmail.com'
+EMAIL_HOST_PASSWORD = 'rdxalhwcbsodugmv'   # App password, not normal password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -109,18 +119,6 @@ DATABASES = {
 #         'PORT': '5432',               # Default PostgreSQL port
 #     }
 # }
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'abdisaworkmail@gmail.com'
-EMAIL_HOST_PASSWORD = 'rdxalhwcbsodugmv'   # App password, not normal password
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-ALLOWED_HOSTS = []
-
-
-
-
 
 
 # Password validation

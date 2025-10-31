@@ -85,7 +85,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
-allowed_hosts = ['abdisa16.pythonanywhere.com']
+ALLOWED_HOSTS = ['abdisa16.pythonanywhere.com']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
